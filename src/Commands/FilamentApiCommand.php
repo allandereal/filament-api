@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Allandereal\FilamentApi\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class FilamentApiCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'filament-api';
 
     public $description = 'My command';
 
