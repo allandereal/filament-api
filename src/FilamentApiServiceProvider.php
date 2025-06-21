@@ -2,6 +2,8 @@
 
 namespace Allandereal\FilamentApi;
 
+use Allandereal\FilamentApi\Commands\FilamentApiCommand;
+use Allandereal\FilamentApi\Testing\TestsFilamentApi;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -13,8 +15,6 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Allandereal\FilamentApi\Commands\FilamentApiCommand;
-use Allandereal\FilamentApi\Testing\TestsFilamentApi;
 
 class FilamentApiServiceProvider extends PackageServiceProvider
 {
