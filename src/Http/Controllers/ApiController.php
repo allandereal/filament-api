@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ApiController
@@ -39,7 +40,28 @@ class ApiController
     {
         return ApiResource::collection(
             QueryBuilder::for($this->model)
-                ->allowedFilters(['status', 'deleted_at'])
+                ->allowedFields(['id', 'name'])
+                ->allowedFilters([
+                    AllowedFilter::exact('id'),
+                    AllowedFilter::exact('status'),
+                    AllowedFilter::exact('deleted_at'),
+                    AllowedFilter::exact('commentable_id'),
+                    AllowedFilter::exact('commentable_type'),
+                    AllowedFilter::exact('taggable_id'),
+                    AllowedFilter::exact('taggable_type'),
+                    AllowedFilter::exact('shop_customers'),
+                    AllowedFilter::exact('addressable_id'),
+                    AllowedFilter::exact('addressable_type'),
+                    AllowedFilter::exact('shop_customer_id'),
+                    AllowedFilter::exact('order_id'),
+                    AllowedFilter::exact('model_id'),
+                    AllowedFilter::exact('model_type'),
+                    AllowedFilter::exact('shop_order_id'),
+                    AllowedFilter::exact('shop_brand_id'),
+                    AllowedFilter::exact('shop_product_id'),
+                    AllowedFilter::exact('shop_category_id'),
+                ])
+                ->allowedSorts(['id', 'name', 'sort', 'date', 'number', 'currency', 'total_price', 'shipping_price', 'created_at', 'order_column'])
                 ->paginate(
                     perPage: $this->request->query('perPage') ?? 10,
                     page: $this->request->query('page') ?? 1
@@ -90,15 +112,20 @@ class ApiController
             fn ($item) => [$item => $this->getRelatedModel($item, $resource)]
         )->filter();
 
+        //TODO: write logic to auto discover slug endpoints eg. blog-categories for model Models\Blog\Category
         $this->model = collect(config('filament-api.models'))
             ->merge($resourceModels)
             ->merge($relatedModels)
             ->firstWhere(
-                fn ($item) => Str::of($item)
-                    ->afterLast('\\')
-                    ->slug()
-                    ->singular()
-                    ->value() === Str::singular($resource)
+                fn ($item, $key) => Str::of($item)
+                        ->when(
+                            str_contains($key, '-'),
+                            fn() => Str::of($key),
+                            fn ($str, $key) => $str->afterLast('\\')
+                        )
+                        ->slug()
+                        ->singular()
+                        ->value() === Str::singular($resource)
             );
 
         if (! $this->model) {
