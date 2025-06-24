@@ -2,6 +2,7 @@
 
 namespace Allandereal\FilamentApi\Tests;
 
+use Allandereal\FilamentApi\FilamentApiServiceProvider;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
@@ -16,7 +17,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
-use Allandereal\FilamentApi\FilamentApiServiceProvider;
 
 class TestCase extends Orchestra
 {
