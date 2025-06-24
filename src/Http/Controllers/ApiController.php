@@ -112,20 +112,20 @@ class ApiController
             fn ($item) => [$item => $this->getRelatedModel($item, $resource)]
         )->filter();
 
-        //TODO: write logic to auto discover slug endpoints eg. blog-categories for model Models\Blog\Category
+        // TODO: write logic to auto discover slug endpoints eg. blog-categories for model Models\Blog\Category
         $this->model = collect(config('filament-api.models'))
             ->merge($resourceModels)
             ->merge($relatedModels)
             ->firstWhere(
                 fn ($item, $key) => Str::of($item)
-                        ->when(
-                            str_contains($key, '-'),
-                            fn() => Str::of($key),
-                            fn ($str, $key) => $str->afterLast('\\')
-                        )
-                        ->slug()
-                        ->singular()
-                        ->value() === Str::singular($resource)
+                    ->when(
+                        str_contains($key, '-'),
+                        fn () => Str::of($key),
+                        fn ($str, $key) => $str->afterLast('\\')
+                    )
+                    ->slug()
+                    ->singular()
+                    ->value() === Str::singular($resource)
             );
 
         if (! $this->model) {
