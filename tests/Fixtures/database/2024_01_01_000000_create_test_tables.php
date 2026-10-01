@@ -28,8 +28,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('teams', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('team_user', function (Blueprint $table) {
+            $table->foreignId('team_id');
+            $table->foreignId('user_id');
+        });
+
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('team_id')->nullable();
             $table->string('title');
             $table->text('body')->nullable();
             $table->string('status')->default('draft');

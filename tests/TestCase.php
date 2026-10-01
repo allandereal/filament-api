@@ -7,6 +7,7 @@ use Allandereal\FilamentApi\Tests\Fixtures\Models\Post;
 use Allandereal\FilamentApi\Tests\Fixtures\Models\User;
 use Allandereal\FilamentApi\Tests\Fixtures\Policies\PostPolicy;
 use Allandereal\FilamentApi\Tests\Fixtures\Providers\AdminPanelProvider;
+use Allandereal\FilamentApi\Tests\Fixtures\Providers\AppPanelProvider;
 use Allandereal\FilamentApi\Tests\Fixtures\Providers\OtherPanelProvider;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
@@ -56,6 +57,7 @@ class TestCase extends Orchestra
             TablesServiceProvider::class,
             WidgetsServiceProvider::class,
             AdminPanelProvider::class,
+            AppPanelProvider::class,
             OtherPanelProvider::class,
             FilamentApiServiceProvider::class,
         ];
