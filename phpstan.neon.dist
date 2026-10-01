@@ -9,4 +9,7 @@ parameters:
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
+    # The package supports several versions of Laravel, Filament and Sanctum, so an error that is ignored for one
+    # version (e.g. Sanctum 3's HasApiTokens contract) may not occur with another.
+    reportUnmatchedIgnoredErrors: false
 
