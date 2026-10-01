@@ -1,10 +1,13 @@
 {
     "name": "allandereal/filament-api",
-    "description": "A filament plugin to create API endpoints for resources in the panel builder",
+    "description": "Turn the resources of a Filament panel into a REST API",
     "keywords": [
         "allandereal",
         "laravel",
-        "filament-api"
+        "filament",
+        "filament-plugin",
+        "api",
+        "rest"
     ],
     "homepage": "https://github.com/allandereal/filament-api",
     "support": {
@@ -21,7 +24,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "filament/filament": "^3.0",
+        "filament/filament": "^3.2",
         "spatie/laravel-package-tools": "^1.15.0",
         "spatie/laravel-query-builder": "^6.3"
     },
@@ -39,8 +42,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Allandereal\\FilamentApi\\": "src/",
-            "Allandereal\\FilamentApi\\Database\\Factories\\": "database/factories/"
+            "Allandereal\\FilamentApi\\": "src/"
         }
     },
     "autoload-dev": {

@@ -1,0 +1,26 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Access to an undefined property Filament\\\\Tables\\\\Contracts\\\\HasTable&Livewire\\\\Component\\:\\:\\$activeTab\\.$#"
+			count: 1
+			path: src/Support/TableQuery.php
+
+		-
+			message: "#^Access to an undefined property Filament\\\\Tables\\\\Contracts\\\\HasTable&Livewire\\\\Component\\:\\:\\$tableFilters\\.$#"
+			count: 1
+			path: src/Support/TableQuery.php
+
+		-
+			message: "#^Access to an undefined property Filament\\\\Tables\\\\Contracts\\\\HasTable&Livewire\\\\Component\\:\\:\\$tableSearch\\.$#"
+			count: 1
+			path: src/Support/TableQuery.php
+
+		-
+			message: "#^Access to an undefined property Filament\\\\Tables\\\\Contracts\\\\HasTable&Livewire\\\\Component\\:\\:\\$tableSortColumn\\.$#"
+			count: 1
+			path: src/Support/TableQuery.php
+
+		-
+			message: "#^Access to an undefined property Filament\\\\Tables\\\\Contracts\\\\HasTable&Livewire\\\\Component\\:\\:\\$tableSortDirection\\.$#"
+			count: 1
+			path: src/Support/TableQuery.php
