@@ -32,8 +32,10 @@ The package has no config file.
 | `logRequests(bool $condition = true)` | `false` | Record every API request, and add the [API logs](logging.md) page to the panel. |
 | `logRetention(?int $days)` | `30` | How many days to keep the logs. `null` keeps them forever. |
 | `logsNavigationGroup(?string $group)` | `null` | The navigation group of the API logs page. |
+| `operatorFilters(bool $condition = true)` | `false` | Allow [`where[{column}][{operator}]`](aggregates.md#operator-filters) filters on list endpoints. |
+| `aggregates(bool $condition = true)` | `false` | Allow [`aggregate` and `group`](aggregates.md#aggregates) on list endpoints. |
 | `login(bool $condition = true)` | `false` | Add the [login, user and logout endpoints](login.md). |
-| `loginTokenLifetime(?int $days)` | `30` | How many days login tokens are valid. `null` issues tokens that don't expire. |
+| `loginTokenLifetime(?int $days)` | `30` | How many days login tokens are valid, at most. `null` issues tokens that don't expire, unless the login sends [`expires_in`](login.md#expiring-with-the-clients-session). |
 | `loginMiddleware(array $middleware)` | `['api']` | The middleware of the login endpoint. It must not require authentication. |
 
 The middleware you set replaces the default list, so include an authentication middleware and a rate limiter. The package always adds middleware of its own around your list:
@@ -64,6 +66,16 @@ RateLimiter::for('filament-api', fn (Request $request) => $request->user()?->is_
 FilamentApiPlugin::make()
     ->middleware(['api', 'auth:sanctum', 'throttle:filament-api'])
 ```
+
+> [!IMPORTANT]
+> Every rate limiter in the middleware list applies, so the lowest limit wins. In apps created with Laravel 10 or older, and in Laravel 11+ apps that call `->throttleApi()`, the `api` middleware group includes `throttle:api`, which allows 60 requests a minute by default. To raise the limit, either raise the `api` limiter in your app, or replace `api` with the middleware you need from it:
+>
+> ```php
+> FilamentApiPlugin::make()
+>     ->middleware([SubstituteBindings::class, 'auth:sanctum', 'throttle:600,1'])
+> ```
+>
+> Run `php artisan route:list --path=api -v` to see the middleware of each route.
 
 Rejected requests get `429 Too Many Requests` with a `Retry-After` header. Clients can also batch their reads with [`filter[id]=1,2,3`](listing.md#filtering-by-key) to need fewer requests.
 

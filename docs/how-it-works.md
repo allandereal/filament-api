@@ -28,6 +28,7 @@ Each route runs through:
    - dispatches `ServingFilament`
 5. Filament's `IdentifyTenant`, which resolves the `{tenant}` URL segment on panels with tenancy.
 6. `CheckTokenAbilities`, which checks the abilities of the request's API token against the route's `filamentApiEndpoint` and `filamentApiAbility` defaults (`read` or `write`). It uses `Support\TokenAbilities`, and skips requests without a token.
+7. `ExtendLoginToken`, which pushes back the expiry of login tokens that expire after a period of inactivity (`filament-api-idle:{seconds}` ability), within the token's lifetime.
 
 ## Listing: `TableQuery`
 
@@ -55,6 +56,10 @@ The controller then paginates the query.
 ## The API tokens page
 
 `Pages\ApiTokens` is a regular Filament page with a table, registered by `FilamentApiPlugin::register()`. Its table queries the user's `tokens()` relationship, so users can only see and revoke their own tokens. Creating a token turns the chosen access into abilities, keeping only endpoints that exist, and calls Sanctum's `createToken()`. The plain-text token is kept in a locked Livewire property until the user dismisses it.
+
+## Operator filters and aggregates
+
+`Controller::applyColumnQuery()` runs after the list query is built (by `TableQuery` for resources and relation managers, or by spatie/laravel-query-builder for models). `Support\ColumnQuery` checks each column against the table's columns (from the schema builder, cached per table) and the model's `$hidden` / `$visible`, then adds the `where` constraints. For an aggregate, it takes the query's base query without its columns and order, and adds `{function}(column)` and, for a group, a date-format expression for the database driver.
 
 ## Request logs
 

@@ -4,6 +4,7 @@ namespace Allandereal\FilamentApi\Http\Controllers;
 
 use Allandereal\FilamentApi\Http\Resources\ApiResource;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +20,7 @@ use function Filament\authorize;
  */
 class ModelController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection | JsonResponse
     {
         $definition = $this->getDefinition($request);
 
@@ -46,7 +47,8 @@ class ModelController extends Controller
             $query->defaultSort($definition['default_sort']);
         }
 
-        return ApiResource::collection($this->paginate($query, $request));
+        return $this->applyColumnQuery($query, $request)
+            ?? ApiResource::collection($this->paginate($query, $request));
     }
 
     public function show(Request $request): ApiResource

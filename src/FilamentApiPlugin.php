@@ -47,6 +47,10 @@ class FilamentApiPlugin implements Plugin
 
     protected ?string $logsNavigationGroup = null;
 
+    protected bool $hasOperatorFilters = false;
+
+    protected bool $hasAggregates = false;
+
     protected bool $hasLogin = false;
 
     protected ?int $loginTokenLifetime = 30;
@@ -348,5 +352,36 @@ class FilamentApiPlugin implements Plugin
     public function getLoginMiddleware(): array
     {
         return $this->loginMiddleware;
+    }
+
+    /**
+     * Let list endpoints filter by any visible column with operators: `?where[total_price][gte]=100`.
+     */
+    public function operatorFilters(bool $condition = true): static
+    {
+        $this->hasOperatorFilters = $condition;
+
+        return $this;
+    }
+
+    public function hasOperatorFilters(): bool
+    {
+        return $this->hasOperatorFilters;
+    }
+
+    /**
+     * Let list endpoints compute aggregates of any visible column, optionally grouped by a date bucket:
+     * `?aggregate=avg:total_price` or `?aggregate=count:*&group=month:created_at`.
+     */
+    public function aggregates(bool $condition = true): static
+    {
+        $this->hasAggregates = $condition;
+
+        return $this;
+    }
+
+    public function hasAggregates(): bool
+    {
+        return $this->hasAggregates;
     }
 }

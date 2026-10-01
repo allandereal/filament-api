@@ -45,6 +45,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('body')->nullable();
             $table->string('status')->default('draft');
+            $table->unsignedInteger('views')->default(0);
+            $table->string('secret_note')->nullable();
             $table->timestamps();
         });
 

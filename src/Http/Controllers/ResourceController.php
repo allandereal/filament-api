@@ -27,7 +27,7 @@ use Illuminate\Validation\ValidationException;
  */
 class ResourceController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection | JsonResponse
     {
         $resource = $this->getResource($request);
 
@@ -40,7 +40,8 @@ class ResourceController extends Controller
             ? TableQuery::for(app($page), $request)
             : $resource::getEloquentQuery();
 
-        return ApiResource::collection($this->paginate($query, $request));
+        return $this->applyColumnQuery($query, $request)
+            ?? ApiResource::collection($this->paginate($query, $request));
     }
 
     public function store(Request $request): JsonResponse
@@ -109,7 +110,7 @@ class ResourceController extends Controller
     /**
      * List the records of one of the resource's relation managers, e.g. `GET /api/shop/orders/1/payments`.
      */
-    public function relationIndex(Request $request): AnonymousResourceCollection
+    public function relationIndex(Request $request): AnonymousResourceCollection | JsonResponse
     {
         $resource = $this->getResource($request);
 
@@ -130,7 +131,10 @@ class ResourceController extends Controller
         $livewire->ownerRecord = $ownerRecord;
         $livewire->pageClass = $pageClass;
 
-        return ApiResource::collection($this->paginate(TableQuery::for($livewire, $request), $request));
+        $query = TableQuery::for($livewire, $request);
+
+        return $this->applyColumnQuery($query, $request)
+            ?? ApiResource::collection($this->paginate($query, $request));
     }
 
     /**

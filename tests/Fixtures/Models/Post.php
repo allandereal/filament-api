@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Post extends Model
 {
-    protected $fillable = ['title', 'body', 'status'];
+    protected $fillable = ['title', 'body', 'status', 'views', 'secret_note'];
+
+    protected $hidden = ['secret_note'];
 
     /**
      * The tenant of the post in the `app` panel.

@@ -19,6 +19,12 @@ It also adds an **API tokens** page to the panel, where users create tokens scop
 
 Read the full [documentation](docs/README.md), or start with [installation](docs/installation.md). If you used version 1.0, read [Upgrading from 1.0](docs/upgrading.md).
 
+## Requirements
+
+- PHP 8.1 or higher
+- Laravel 10, 11, 12 or 13
+- Filament 3.2 or higher
+
 ## Installation
 
 ```bash
@@ -105,6 +111,10 @@ The API only enforces the rules declared on the form. For example, Filament's `S
 ## API tokens
 
 The plugin adds an **API tokens** page to the panel for users whose model uses Sanctum's `HasApiTokens` trait. Users create tokens with an expiry and one of three access levels: read-only, custom (read or write per endpoint), or full access. The token is shown once. A token that doesn't have access to an endpoint gets `403`. See [API tokens](docs/tokens.md).
+
+## Operator filters and aggregates
+
+Turn on `->operatorFilters()` and `->aggregates()` to let clients filter by any visible column (`?where[total_price][gte]=100`) and compute counts, sums, averages, minimums and maximums, optionally grouped by date like laravel-trend (`?aggregate=count:*&group=month:created_at`). They apply inside the resource's query, so tenancy, tabs and filters still apply. See [Operator filters and aggregates](docs/aggregates.md).
 
 ## Login endpoints
 

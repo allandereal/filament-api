@@ -24,7 +24,9 @@ class AppPanelProvider extends PanelProvider
             ])
             ->plugin(
                 FilamentApiPlugin::make()
-                    ->logRequests(),
+                    ->logRequests()
+                    ->operatorFilters()
+                    ->aggregates(),
             );
     }
 }

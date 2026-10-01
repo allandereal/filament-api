@@ -136,6 +136,10 @@ Each record is the model's array form (`Model::toArray()`), so `$hidden`, `$visi
 {"data": {"id": 65, "number": "OR852997"}}
 ```
 
+## Operator filters and aggregates
+
+With `->operatorFilters()` and `->aggregates()`, list endpoints also accept `where[{column}][{operator}]` filters and `aggregate` / `group` parameters. See [Operator filters and aggregates](aggregates.md).
+
 ## Errors
 
 Unknown filters, sorts and tabs, and invalid pagination, are rejected with a `422` response that lists the allowed values:

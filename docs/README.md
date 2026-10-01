@@ -7,6 +7,7 @@ Filament API turns the resources of a Filament panel into a REST API. Every requ
 1. [Installation](installation.md): install the package, enable it on a panel, and authenticate requests.
 2. [Endpoints](endpoints.md): the URLs and routes the package registers.
 3. [Listing records](listing.md): filtering, searching, sorting, tabs, pagination and the response format.
+   - [Operator filters and aggregates](aggregates.md): `where[...]` filters, and counts, sums and averages, optionally grouped by date.
 4. [Creating, updating and deleting records](writing.md): how requests go through the resource's form and pages.
 5. [Authorization](authorization.md): who can call the API, and what they can do.
 6. [API tokens](tokens.md): the page where users create, scope and revoke their tokens.
@@ -20,6 +21,7 @@ Filament API turns the resources of a Filament panel into a REST API. Every requ
 
 ## Requirements
 
-- PHP 8.1 or higher
-- Filament 3.2 or higher
+- PHP 8.1 or higher (8.2 for Laravel 11 and 12, 8.3 for Laravel 13)
+- Laravel 10, 11, 12 or 13
+- Filament 3.2 or higher (Laravel 13 needs Filament 3.3.54 or higher)
 - An authentication middleware for the API, such as [Laravel Sanctum](https://laravel.com/docs/sanctum)
