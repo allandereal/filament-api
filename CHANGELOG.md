@@ -22,6 +22,7 @@ All notable changes to `filament-api` will be documented in this file.
 - Login tokens can expire after a period of inactivity, like the client's session (`expires_in`).
 - Added operator filters (`->operatorFilters()`, `where[column][operator]`) and aggregates (`->aggregates()`, `aggregate` and `group`).
 - With operator filters, `sort` accepts any visible column.
+- The API tokens and API logs pages are grouped under "API" in the navigation (`->navigationGroup()`).
 - User responses never include passwords, remember tokens or two-factor secrets.
 - Supports Laravel 10, 11, 12 and 13, tested on PHP 8.1 to 8.5.
 

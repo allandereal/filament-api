@@ -39,13 +39,19 @@ class FilamentApiPlugin implements Plugin
 
     protected bool $hasTokens = true;
 
+    protected ?string $navigationGroup = 'API';
+
     protected ?string $tokensNavigationGroup = null;
+
+    protected bool $hasTokensNavigationGroup = false;
 
     protected bool $isLoggingRequests = false;
 
     protected ?int $logRetention = 30;
 
     protected ?string $logsNavigationGroup = null;
+
+    protected bool $hasLogsNavigationGroup = false;
 
     protected bool $hasOperatorFilters = false;
 
@@ -249,16 +255,35 @@ class FilamentApiPlugin implements Plugin
         return $this->hasTokens;
     }
 
+    /**
+     * The navigation group of the plugin's pages (API tokens and API logs). `null` puts them outside of a group.
+     */
+    public function navigationGroup(?string $group): static
+    {
+        $this->navigationGroup = $group;
+
+        return $this;
+    }
+
+    public function getNavigationGroup(): ?string
+    {
+        return $this->navigationGroup;
+    }
+
+    /**
+     * Put the API tokens page in another navigation group than the plugin's other pages.
+     */
     public function tokensNavigationGroup(?string $group): static
     {
         $this->tokensNavigationGroup = $group;
+        $this->hasTokensNavigationGroup = true;
 
         return $this;
     }
 
     public function getTokensNavigationGroup(): ?string
     {
-        return $this->tokensNavigationGroup;
+        return $this->hasTokensNavigationGroup ? $this->tokensNavigationGroup : $this->getNavigationGroup();
     }
 
     /**
@@ -291,16 +316,20 @@ class FilamentApiPlugin implements Plugin
         return $this->logRetention;
     }
 
+    /**
+     * Put the API logs page in another navigation group than the plugin's other pages.
+     */
     public function logsNavigationGroup(?string $group): static
     {
         $this->logsNavigationGroup = $group;
+        $this->hasLogsNavigationGroup = true;
 
         return $this;
     }
 
     public function getLogsNavigationGroup(): ?string
     {
-        return $this->logsNavigationGroup;
+        return $this->hasLogsNavigationGroup ? $this->logsNavigationGroup : $this->getNavigationGroup();
     }
 
     /**

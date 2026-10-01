@@ -36,6 +36,8 @@ class ApiTokens extends Page implements HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
 
+    protected static ?int $navigationSort = 1;
+
     protected static ?string $title = 'API tokens';
 
     protected static ?string $slug = 'api-tokens';
@@ -76,6 +78,9 @@ class ApiTokens extends Page implements HasTable
             ->query(fn (): Builder => $this->getUser()->tokens()->getQuery())
             ->columns([
                 TextColumn::make('name')
+                    // Login tokens are named after the client's user agent, which can be long.
+                    ->limit(60)
+                    ->tooltip(fn (TextColumn $column, ?string $state): ?string => (strlen((string) $state) > $column->getCharacterLimit()) ? $state : null)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('abilities')
@@ -89,7 +94,8 @@ class ApiTokens extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('expires_at')
                     ->label('Expires')
-                    ->date()
+                    // Login tokens can expire after a few hours of inactivity, so show the time too.
+                    ->dateTime('M j, Y H:i')
                     ->placeholder('Never')
                     ->color(fn (?Carbon $state): ?string => $state?->isPast() ? 'danger' : null)
                     ->sortable(),

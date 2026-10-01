@@ -28,10 +28,11 @@ The package has no config file.
 | `perPage(int $perPage)` | `15` | The default page size. |
 | `maxPerPage(int $maxPerPage)` | `100` | The largest `per_page` a client can request. |
 | `tokens(bool $condition = true)` | `true` | Add the [API tokens](tokens.md) page to the panel. |
-| `tokensNavigationGroup(?string $group)` | `null` | The navigation group of the API tokens page. |
+| `navigationGroup(?string $group)` | `'API'` | The navigation group of the plugin's pages: API tokens and API logs. `null` puts them outside of a group. |
+| `tokensNavigationGroup(?string $group)` | the `navigationGroup()` | The navigation group of the API tokens page, if it should differ. |
 | `logRequests(bool $condition = true)` | `false` | Record every API request, and add the [API logs](logging.md) page to the panel. |
 | `logRetention(?int $days)` | `30` | How many days to keep the logs. `null` keeps them forever. |
-| `logsNavigationGroup(?string $group)` | `null` | The navigation group of the API logs page. |
+| `logsNavigationGroup(?string $group)` | the `navigationGroup()` | The navigation group of the API logs page, if it should differ. |
 | `operatorFilters(bool $condition = true)` | `false` | Allow [`where[{column}][{operator}]`](aggregates.md#operator-filters) filters on list endpoints, and [sorting by any visible column](aggregates.md#sorting-by-any-column). |
 | `aggregates(bool $condition = true)` | `false` | Allow [`aggregate` and `group`](aggregates.md#aggregates) on list endpoints. |
 | `login(bool $condition = true)` | `false` | Add the [login, user and logout endpoints](login.md). |
@@ -95,6 +96,18 @@ FilamentApiPlugin::make()->excludeResources([
 ```
 
 Resources must belong to the panel. Listing a resource that isn't registered on the panel has no effect.
+
+## Navigation
+
+The plugin's pages, **API tokens** and **API logs**, are grouped under **API** in the panel's navigation, in that order. Rename the group, or remove it:
+
+```php
+FilamentApiPlugin::make()
+    ->navigationGroup('Integrations')   // Rename the group
+    ->navigationGroup(null)             // Or list the pages outside of a group
+```
+
+To move a single page, use `->tokensNavigationGroup()` or `->logsNavigationGroup()`. The group is sorted like the panel's other groups: add it to the panel's `->navigationGroups([...])` to choose its position.
 
 ## Several panels
 

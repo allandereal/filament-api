@@ -69,7 +69,7 @@ php artisan model:prune --model="Allandereal\FilamentApi\Models\ApiRequest"
 
 ## The API logs page
 
-When logging is on, the panel gets an **API logs** page with:
+When logging is on, the panel gets an **API logs** page, next to **API tokens** in the **API** navigation group, with:
 
 - **Stats for the last 24 hours**: the number of requests, the error rate and number of server errors, the average response time, and the slowest endpoint.
 - **A table of requests**, newest first, refreshed every 10 seconds. You can search by path, and filter by status (successful, client errors, server errors), method, endpoint, token and time.

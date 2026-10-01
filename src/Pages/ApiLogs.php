@@ -30,6 +30,8 @@ class ApiLogs extends Page implements HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-queue-list';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $title = 'API logs';
 
     protected static ?string $slug = 'api-logs';

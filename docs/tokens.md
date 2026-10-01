@@ -1,6 +1,6 @@
 # API tokens
 
-The plugin adds an **API tokens** page to the panel. Users create, scope and revoke their own [Sanctum](https://laravel.com/docs/sanctum) tokens there, so you don't have to build token management yourself.
+The plugin adds an **API tokens** page to the panel, in the **API** navigation group. Users create, scope and revoke their own [Sanctum](https://laravel.com/docs/sanctum) tokens there, so you don't have to build token management yourself.
 
 ## Requirements
 
@@ -69,7 +69,7 @@ Users can only see and revoke their own tokens.
 
 ```php
 FilamentApiPlugin::make()
-    ->tokensNavigationGroup('Settings') // Put the page in a navigation group
+    ->tokensNavigationGroup('Settings') // Put the page in another navigation group than "API"
     ->tokens(false)                     // Or remove the page
 ```
 
