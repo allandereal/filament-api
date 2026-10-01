@@ -37,7 +37,7 @@ Field errors use the form's field names, and listing errors use the parameter na
 
 ## Routing errors
 
-Laravel raises `404` for a URL that matches no route, and `405` for a method the route doesn't support, while it matches the route. This happens before the package's middleware forces JSON. A client that doesn't send `Accept: application/json` gets the HTML error page for these two errors.
+Laravel raises `404` for a URL that matches no route, and `405` for a method the route doesn't support, while it matches the route. This happens before the package's middleware runs, so a client that doesn't send `Accept: application/json` gets the HTML error page for these two errors, and they aren't [logged](logging.md).
 
 ## Debug mode
 

@@ -26,6 +26,7 @@ class AdminPanelProvider extends PanelProvider
                     ->middleware(['api', 'auth:sanctum'])
                     ->perPage(2)
                     ->maxPerPage(5)
+                    ->logRequests()
                     ->models([
                         'secrets' => ['model' => Secret::class, 'filters' => ['name'], 'sorts' => ['name']],
                     ]),

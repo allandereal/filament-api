@@ -10,11 +10,12 @@ Filament API turns the resources of a Filament panel into a REST API. Every requ
 4. [Creating, updating and deleting records](writing.md): how requests go through the resource's form and pages.
 5. [Authorization](authorization.md): who can call the API, and what they can do.
 6. [API tokens](tokens.md): the page where users create, scope and revoke their tokens.
-7. [Models without a resource](models.md): read-only endpoints for other models.
-8. [Configuration reference](configuration.md): every plugin option.
-9. [Errors](errors.md): status codes and error responses.
-10. [How it works](how-it-works.md): the internals, for contributors and for debugging.
-11. [Upgrading from 1.0](upgrading.md): moving from the `filament-api` config file to the plugin.
+7. [Request logging](logging.md): recording API requests, and the page to browse them.
+8. [Models without a resource](models.md): read-only endpoints for other models.
+9. [Configuration reference](configuration.md): every plugin option.
+10. [Errors](errors.md): status codes and error responses.
+11. [How it works](how-it-works.md): the internals, for contributors and for debugging.
+12. [Upgrading from 1.0](upgrading.md): moving from the `filament-api` config file to the plugin.
 
 ## Requirements
 

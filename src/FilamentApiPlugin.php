@@ -2,6 +2,7 @@
 
 namespace Allandereal\FilamentApi;
 
+use Allandereal\FilamentApi\Pages\ApiLogs;
 use Allandereal\FilamentApi\Pages\ApiTokens;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
@@ -40,6 +41,12 @@ class FilamentApiPlugin implements Plugin
 
     protected ?string $tokensNavigationGroup = null;
 
+    protected bool $isLoggingRequests = false;
+
+    protected ?int $logRetention = 30;
+
+    protected ?string $logsNavigationGroup = null;
+
     public function getId(): string
     {
         return 'filament-api';
@@ -49,6 +56,10 @@ class FilamentApiPlugin implements Plugin
     {
         if ($this->hasTokens()) {
             $panel->pages([ApiTokens::class]);
+        }
+
+        if ($this->isLoggingRequests()) {
+            $panel->pages([ApiLogs::class]);
         }
     }
 
@@ -235,5 +246,47 @@ class FilamentApiPlugin implements Plugin
     public function getTokensNavigationGroup(): ?string
     {
         return $this->tokensNavigationGroup;
+    }
+
+    /**
+     * Record every API request of the panel, and add the API logs page to the panel.
+     */
+    public function logRequests(bool $condition = true): static
+    {
+        $this->isLoggingRequests = $condition;
+
+        return $this;
+    }
+
+    public function isLoggingRequests(): bool
+    {
+        return $this->isLoggingRequests;
+    }
+
+    /**
+     * How many days to keep the logs. Older logs are pruned daily. `null` keeps them forever.
+     */
+    public function logRetention(?int $days): static
+    {
+        $this->logRetention = $days;
+
+        return $this;
+    }
+
+    public function getLogRetention(): ?int
+    {
+        return $this->logRetention;
+    }
+
+    public function logsNavigationGroup(?string $group): static
+    {
+        $this->logsNavigationGroup = $group;
+
+        return $this;
+    }
+
+    public function getLogsNavigationGroup(): ?string
+    {
+        return $this->logsNavigationGroup;
     }
 }

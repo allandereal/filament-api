@@ -5,6 +5,7 @@ use Allandereal\FilamentApi\Http\Controllers\ModelController;
 use Allandereal\FilamentApi\Http\Controllers\ResourceController;
 use Allandereal\FilamentApi\Http\Middleware\CheckTokenAbilities;
 use Allandereal\FilamentApi\Http\Middleware\ForceJsonResponse;
+use Allandereal\FilamentApi\Http\Middleware\LogApiRequest;
 use Allandereal\FilamentApi\Http\Middleware\ServeFilamentApi;
 use Allandereal\FilamentApi\Support\TokenAbilities;
 use Filament\Http\Middleware\IdentifyTenant;
@@ -31,6 +32,7 @@ foreach (FilamentApi::getPanels() as $panel) {
     Route::prefix($prefix)
         ->name("filament-api.{$panel->getId()}.")
         ->middleware([
+            LogApiRequest::class . ":{$panel->getId()}",
             ForceJsonResponse::class,
             ...$plugin->getMiddleware(),
             ServeFilamentApi::class . ":{$panel->getId()}",

@@ -15,7 +15,7 @@ Turn the resources of a Filament panel into a REST API. The API doesn't re-imple
 | The create and edit pages and their hooks (`mutateFormDataBeforeCreate()`...) | Creating and updating records |
 | Relation managers | Nested endpoints, e.g. `GET /api/shop/orders/1/payments` |
 
-It also adds an **API tokens** page to the panel, where users create tokens scoped to the endpoints they need, and revoke them.
+It also adds an **API tokens** page to the panel, where users create tokens scoped to the endpoints they need, and revoke them. Optionally, it records every request and adds an **API logs** page to browse them.
 
 Read the full [documentation](docs/README.md), or start with [installation](docs/installation.md). If you used version 1.0, read [Upgrading from 1.0](docs/upgrading.md).
 
@@ -105,6 +105,10 @@ The API only enforces the rules declared on the form. For example, Filament's `S
 ## API tokens
 
 The plugin adds an **API tokens** page to the panel for users whose model uses Sanctum's `HasApiTokens` trait. Users create tokens with an expiry and one of three access levels: read-only, custom (read or write per endpoint), or full access. The token is shown once. A token that doesn't have access to an endpoint gets `403`. See [API tokens](docs/tokens.md).
+
+## Request logging
+
+Turn on `->logRequests()` to record every API request (method, path, query string, status, duration, user, token and IP, but not the bodies) and add an **API logs** page to the panel, with stats for the last 24 hours. Logs are pruned after 30 days. See [Request logging](docs/logging.md).
 
 ## Configuration
 

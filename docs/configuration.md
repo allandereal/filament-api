@@ -29,10 +29,13 @@ The package has no config file.
 | `maxPerPage(int $maxPerPage)` | `100` | The largest `per_page` a client can request. |
 | `tokens(bool $condition = true)` | `true` | Add the [API tokens](tokens.md) page to the panel. |
 | `tokensNavigationGroup(?string $group)` | `null` | The navigation group of the API tokens page. |
+| `logRequests(bool $condition = true)` | `false` | Record every API request, and add the [API logs](logging.md) page to the panel. |
+| `logRetention(?int $days)` | `30` | How many days to keep the logs. `null` keeps them forever. |
+| `logsNavigationGroup(?string $group)` | `null` | The navigation group of the API logs page. |
 
 The middleware you set replaces the default list, so include an authentication middleware and a rate limiter. The package always adds middleware of its own around your list:
 
-1. Before your list, it forces JSON responses.
+1. Before your list, it starts [logging](logging.md) the request (if logging is on) and forces JSON responses.
 2. After your list, it sets up the panel and checks that the user can access it.
 3. On panels with tenancy, it then identifies the tenant.
 4. Last, it checks the [abilities of the API token](tokens.md#access-levels), if the request uses one.

@@ -18,15 +18,16 @@ Each route stores the resource, relation manager or model in its route defaults 
 
 Each route runs through:
 
-1. `ForceJsonResponse`, which sets `Accept: application/json` so that errors render as JSON.
-2. The plugin's middleware, `api`, `auth:sanctum` and `throttle:60,1` by default.
-3. `ServeFilamentApi:{panel}`, which does what Filament's own panel middleware does:
+1. `LogApiRequest:{panel}`, which starts the timer if the panel logs requests. Its `terminate()` method writes the `ApiRequest` row after the response is sent.
+2. `ForceJsonResponse`, which sets `Accept: application/json` so that errors render as JSON.
+3. The plugin's middleware, `api`, `auth:sanctum` and `throttle:60,1` by default.
+4. `ServeFilamentApi:{panel}`, which does what Filament's own panel middleware does:
    - sets the current panel and boots it (`Filament::setCurrentPanel()`, `Filament::bootCurrentPanel()`)
    - refuses guests (`401`) and users who fail `canAccessPanel()` (`403`)
    - sets the user on the panel's auth guard, because Filament authorizes with `Filament::auth()->user()`, which is usually the session guard and not the API guard
    - dispatches `ServingFilament`
-4. Filament's `IdentifyTenant`, which resolves the `{tenant}` URL segment on panels with tenancy.
-5. `CheckTokenAbilities`, which checks the abilities of the request's API token against the route's `filamentApiEndpoint` and `filamentApiAbility` defaults (`read` or `write`). It uses `Support\TokenAbilities`, and skips requests without a token.
+5. Filament's `IdentifyTenant`, which resolves the `{tenant}` URL segment on panels with tenancy.
+6. `CheckTokenAbilities`, which checks the abilities of the request's API token against the route's `filamentApiEndpoint` and `filamentApiAbility` defaults (`read` or `write`). It uses `Support\TokenAbilities`, and skips requests without a token.
 
 ## Listing: `TableQuery`
 
@@ -54,6 +55,12 @@ The controller then paginates the query.
 ## The API tokens page
 
 `Pages\ApiTokens` is a regular Filament page with a table, registered by `FilamentApiPlugin::register()`. Its table queries the user's `tokens()` relationship, so users can only see and revoke their own tokens. Creating a token turns the chosen access into abilities, keeping only endpoints that exist, and calls Sanctum's `createToken()`. The plain-text token is kept in a locked Livewire property until the user dismisses it.
+
+## Request logs
+
+`LogApiRequest` is the first middleware of every API route, so the duration includes authentication and rate limiting, and rejected requests are recorded. It checks `isLoggingRequests()` at runtime, so turning logging on or off doesn't require clearing the route cache. `Models\ApiRequest` is mass-prunable: its `prunable()` query combines the retention of each panel, and the service provider schedules `model:prune` for it daily when a panel logs requests with a retention.
+
+`Pages\ApiLogs` lists the rows of the current panel, with `Widgets\ApiRequestsOverview` as a header widget. The widget is registered with Livewire directly, so it doesn't appear on the panel's dashboard.
 
 ## Model endpoints
 
