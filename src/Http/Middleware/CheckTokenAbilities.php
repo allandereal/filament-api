@@ -27,6 +27,11 @@ class CheckTokenAbilities
         $endpoint = $request->route('filamentApiEndpoint');
         $action = $request->route('filamentApiAbility');
 
+        // Routes that aren't endpoints, such as `user` and `logout`, are available to every token.
+        if (! ($endpoint && $action)) {
+            return $next($request);
+        }
+
         foreach (TokenAbilities::allowing($panel, $endpoint, $action) as $ability) {
             if ($token->can($ability)) {
                 return $next($request);

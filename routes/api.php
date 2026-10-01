@@ -1,6 +1,7 @@
 <?php
 
 use Allandereal\FilamentApi\Facades\FilamentApi;
+use Allandereal\FilamentApi\Http\Controllers\AuthController;
 use Allandereal\FilamentApi\Http\Controllers\ModelController;
 use Allandereal\FilamentApi\Http\Controllers\ResourceController;
 use Allandereal\FilamentApi\Http\Middleware\CheckTokenAbilities;
@@ -25,6 +26,40 @@ foreach (FilamentApi::getPanels() as $panel) {
 
     $resources = FilamentApi::getResourceEndpoints($panel);
     $models = $plugin->getModels();
+
+    if ($plugin->hasLogin()) {
+        foreach (['login', 'logout', 'user'] as $reserved) {
+            if (array_key_exists($reserved, $resources) || array_key_exists($reserved, $models)) {
+                throw new LogicException("The API endpoint [{$reserved}] of the [{$panel->getId()}] panel is reserved by ->login().");
+            }
+        }
+
+        // Guests call the login endpoint, so it doesn't use the plugin's authentication middleware. The user and
+        // logout endpoints aren't tenant-specific, so they don't have the tenant in their URL.
+        Route::prefix($plugin->getPrefix($panel))
+            ->name("filament-api.{$panel->getId()}.")
+            ->middleware([
+                LogApiRequest::class . ":{$panel->getId()}",
+                ForceJsonResponse::class,
+                ...$plugin->getLoginMiddleware(),
+            ])
+            ->group(function () use ($panel): void {
+                Route::post('login', [AuthController::class, 'login'])->name('login')->defaults('filamentApiPanel', $panel->getId());
+            });
+
+        Route::prefix($plugin->getPrefix($panel))
+            ->name("filament-api.{$panel->getId()}.")
+            ->middleware([
+                LogApiRequest::class . ":{$panel->getId()}",
+                ForceJsonResponse::class,
+                ...$plugin->getMiddleware(),
+                ServeFilamentApi::class . ":{$panel->getId()}",
+            ])
+            ->group(function (): void {
+                Route::get('user', [AuthController::class, 'user'])->name('user');
+                Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+            });
+    }
 
     // Tenant-aware panels get the tenant in the URL, like the panel itself: `api/{tenant}/shop/orders`.
     $prefix = $plugin->getPrefix($panel) . ($panel->hasTenancy() ? '/{tenant}' : '');

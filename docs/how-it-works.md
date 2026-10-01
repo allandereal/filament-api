@@ -62,6 +62,10 @@ The controller then paginates the query.
 
 `Pages\ApiLogs` lists the rows of the current panel, with `Widgets\ApiRequestsOverview` as a header widget. The widget is registered with Livewire directly, so it doesn't appear on the panel's dashboard.
 
+## Login endpoints
+
+With `->login()`, `routes/api.php` registers two more route groups at the plugin's prefix, without the tenant segment. `POST login` uses `->loginMiddleware()` instead of the plugin's middleware, since guests call it. `GET user` and `POST logout` use the plugin's middleware and `ServeFilamentApi`. `AuthController::login()` looks the user up with the user provider of the panel's guard, rate limits failures per panel, email and IP, checks panel access and email verification, and issues a Sanctum token with the panel's `*:read` and `*:write` abilities. `ApiResource` removes sensitive attributes (passwords, remember tokens, two-factor secrets) from every model that implements `Authenticatable`.
+
 ## Model endpoints
 
 `ModelController` doesn't use Filament components. It authorizes with the `Filament\authorize()` helper, which uses the model's policy if there is one, and builds the query with `spatie/laravel-query-builder`.

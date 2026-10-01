@@ -51,7 +51,7 @@ class User extends Authenticatable implements FilamentUser
 }
 ```
 
-Users can now create tokens on the **API tokens** page that the plugin adds to the panel, and choose what each token can access. See [API tokens](tokens.md).
+Users can now create tokens on the **API tokens** page that the plugin adds to the panel, and choose what each token can access. See [API tokens](tokens.md). To let each user of a client sign in with their own email and password instead, see [Login endpoints](login.md).
 
 Send the token with each request, along with `Accept: application/json`:
 

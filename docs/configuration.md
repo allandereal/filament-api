@@ -32,6 +32,9 @@ The package has no config file.
 | `logRequests(bool $condition = true)` | `false` | Record every API request, and add the [API logs](logging.md) page to the panel. |
 | `logRetention(?int $days)` | `30` | How many days to keep the logs. `null` keeps them forever. |
 | `logsNavigationGroup(?string $group)` | `null` | The navigation group of the API logs page. |
+| `login(bool $condition = true)` | `false` | Add the [login, user and logout endpoints](login.md). |
+| `loginTokenLifetime(?int $days)` | `30` | How many days login tokens are valid. `null` issues tokens that don't expire. |
+| `loginMiddleware(array $middleware)` | `['api']` | The middleware of the login endpoint. It must not require authentication. |
 
 The middleware you set replaces the default list, so include an authentication middleware and a rate limiter. The package always adds middleware of its own around your list:
 

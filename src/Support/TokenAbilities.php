@@ -6,7 +6,7 @@ namespace Allandereal\FilamentApi\Support;
  * API tokens are scoped with Sanctum abilities:
  *
  * - `*` gives full access.
- * - `{panel}:*:read` gives read access to every endpoint of the panel.
+ * - `{panel}:*:read` gives read access to every endpoint of the panel, and `{panel}:*:write` write access.
  * - `{panel}:{endpoint}:read` gives read access to one endpoint (list and show records, list relation managers).
  * - `{panel}:{endpoint}:write` gives write access to one endpoint (create, update and delete records).
  */
@@ -24,6 +24,11 @@ class TokenAbilities
     public static function readEverything(string $panel): string
     {
         return static::make($panel, '*', static::READ);
+    }
+
+    public static function writeEverything(string $panel): string
+    {
+        return static::make($panel, '*', static::WRITE);
     }
 
     /**

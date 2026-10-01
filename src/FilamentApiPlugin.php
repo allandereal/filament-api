@@ -47,6 +47,15 @@ class FilamentApiPlugin implements Plugin
 
     protected ?string $logsNavigationGroup = null;
 
+    protected bool $hasLogin = false;
+
+    protected ?int $loginTokenLifetime = 30;
+
+    /**
+     * @var array<string>
+     */
+    protected array $loginMiddleware = ['api'];
+
     public function getId(): string
     {
         return 'filament-api';
@@ -288,5 +297,56 @@ class FilamentApiPlugin implements Plugin
     public function getLogsNavigationGroup(): ?string
     {
         return $this->logsNavigationGroup;
+    }
+
+    /**
+     * Add `POST login`, `GET user` and `POST logout` endpoints, so that each user of an API client can sign in with
+     * their own email and password and get their own token, instead of the client sharing one token.
+     */
+    public function login(bool $condition = true): static
+    {
+        $this->hasLogin = $condition;
+
+        return $this;
+    }
+
+    public function hasLogin(): bool
+    {
+        return $this->hasLogin;
+    }
+
+    /**
+     * How many days the tokens issued by the login endpoint are valid. `null` issues tokens that don't expire.
+     */
+    public function loginTokenLifetime(?int $days): static
+    {
+        $this->loginTokenLifetime = $days;
+
+        return $this;
+    }
+
+    public function getLoginTokenLifetime(): ?int
+    {
+        return $this->loginTokenLifetime;
+    }
+
+    /**
+     * The middleware of the login endpoint, which guests call, so it must not require authentication.
+     *
+     * @param  array<string>  $middleware
+     */
+    public function loginMiddleware(array $middleware): static
+    {
+        $this->loginMiddleware = $middleware;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getLoginMiddleware(): array
+    {
+        return $this->loginMiddleware;
     }
 }

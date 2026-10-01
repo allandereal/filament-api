@@ -27,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
                     ->perPage(2)
                     ->maxPerPage(5)
                     ->logRequests()
+                    ->login()
                     ->models([
                         'secrets' => ['model' => Secret::class, 'filters' => ['name'], 'sorts' => ['name']],
                     ]),

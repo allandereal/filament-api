@@ -9,7 +9,7 @@ Errors are JSON responses with a `message`, and an `errors` object for validatio
 | `404 Not Found` | The endpoint doesn't exist, or the record doesn't exist or is outside the resource's query. On panels with tenancy, the user can't access the tenant. |
 | `405 Method Not Allowed` | The endpoint doesn't support the method, for example `POST /api/posts/1`, or writes on a model endpoint. |
 | `422 Unprocessable Entity` | Validation failed, or a filter, sort, tab or pagination parameter is invalid, or a page hook halted the creation. |
-| `429 Too Many Requests` | The rate limiter rejected the request. The `Retry-After` header says how many seconds to wait. See [Rate limiting](configuration.md#rate-limiting). |
+| `429 Too Many Requests` | The rate limiter rejected the request, or there were too many failed [logins](login.md#rate-limiting). The `Retry-After` header says how many seconds to wait. See [Rate limiting](configuration.md#rate-limiting). |
 
 ## Validation errors
 

@@ -53,6 +53,10 @@ A token's access is checked on top of the user's own permissions: a token never 
 
 If you add, rename or remove a resource, existing tokens keep their abilities. A token with access to a renamed endpoint has to be recreated.
 
+## Tokens issued by the login endpoint
+
+When the plugin has [login endpoints](login.md), each login creates a token named `Login: {device}`, with access to everything the user can do in the panel. These tokens are listed on the page too, so users can see where they're logged in and revoke a device.
+
 ## Revoking tokens
 
 The page lists the user's own tokens, with their access, when they were last used and when they expire. Expired tokens are shown in red, and Sanctum rejects them with `401`.

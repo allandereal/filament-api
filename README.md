@@ -106,6 +106,10 @@ The API only enforces the rules declared on the form. For example, Filament's `S
 
 The plugin adds an **API tokens** page to the panel for users whose model uses Sanctum's `HasApiTokens` trait. Users create tokens with an expiry and one of three access levels: read-only, custom (read or write per endpoint), or full access. The token is shown once. A token that doesn't have access to an endpoint gets `403`. See [API tokens](docs/tokens.md).
 
+## Login endpoints
+
+Turn on `->login()` to let each user of an API client sign in with their own email and password: `POST /api/login` returns a token that expires and is limited to the panel, `GET /api/user` returns the current user, and `POST /api/logout` revokes the token. Failed logins are rate limited. See [Login endpoints](docs/login.md).
+
 ## Request logging
 
 Turn on `->logRequests()` to record every API request (method, path, query string, status, duration, user, token and IP, but not the bodies) and add an **API logs** page to the panel, with stats for the last 24 hours. Logs are pruned after 30 days. See [Request logging](docs/logging.md).

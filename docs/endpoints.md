@@ -39,6 +39,10 @@ To create or update related records, use the related resource's own endpoint if 
 
 Models without a resource can be exposed as read-only `index` and `show` endpoints. See [Models without a resource](models.md).
 
+## Login endpoints
+
+With `->login()`, the plugin also adds `POST /api/login`, `GET /api/user` and `POST /api/logout`. See [Login endpoints](login.md). The `login`, `logout` and `user` endpoints are then reserved: a resource or model endpoint with one of these names throws an exception when the routes are registered.
+
 ## Prefix
 
 The default panel uses the `api` prefix, and other panels use `api/{panel-id}`. Change it with `->prefix()`:

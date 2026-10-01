@@ -18,6 +18,8 @@ All notable changes to `filament-api` will be documented in this file.
 - Fixed listing tables with deferred filters, which crashed on query builder filters.
 - Model endpoints answer `422` instead of `400` for filters and sorts that aren't allowed.
 - Added request logging (`->logRequests()`) with an API logs page, a stats widget and daily pruning.
+- Added login, user and logout endpoints (`->login()`) that issue per-user tokens.
+- User responses never include passwords, remember tokens or two-factor secrets.
 
 ## 1.0.0 - 202X-XX-XX
 
