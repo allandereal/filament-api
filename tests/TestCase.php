@@ -3,6 +3,11 @@
 namespace Allandereal\FilamentApi\Tests;
 
 use Allandereal\FilamentApi\FilamentApiServiceProvider;
+use Allandereal\FilamentApi\Tests\Fixtures\Models\Post;
+use Allandereal\FilamentApi\Tests\Fixtures\Models\User;
+use Allandereal\FilamentApi\Tests\Fixtures\Policies\PostPolicy;
+use Allandereal\FilamentApi\Tests\Fixtures\Providers\AdminPanelProvider;
+use Allandereal\FilamentApi\Tests\Fixtures\Providers\OtherPanelProvider;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
@@ -13,7 +18,7 @@ use Filament\Notifications\NotificationsServiceProvider;
 use Filament\Support\SupportServiceProvider;
 use Filament\Tables\TablesServiceProvider;
 use Filament\Widgets\WidgetsServiceProvider;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Gate;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
@@ -24,9 +29,12 @@ class TestCase extends Orchestra
     {
         parent::setUp();
 
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Allandereal\\FilamentApi\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
-        );
+        Gate::policy(Post::class, PostPolicy::class);
+    }
+
+    protected function defineDatabaseMigrations(): void
+    {
+        $this->loadMigrationsFrom(__DIR__ . '/Fixtures/database');
     }
 
     protected function getPackageProviders($app)
@@ -44,6 +52,8 @@ class TestCase extends Orchestra
             SupportServiceProvider::class,
             TablesServiceProvider::class,
             WidgetsServiceProvider::class,
+            AdminPanelProvider::class,
+            OtherPanelProvider::class,
             FilamentApiServiceProvider::class,
         ];
     }
@@ -51,10 +61,7 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.default', 'testing');
-
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_filament-api_table.php.stub';
-        $migration->up();
-        */
+        config()->set('app.key', 'base64:' . base64_encode(str_repeat('a', 32)));
+        config()->set('auth.providers.users.model', User::class);
     }
 }

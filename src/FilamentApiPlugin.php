@@ -4,9 +4,37 @@ namespace Allandereal\FilamentApi;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class FilamentApiPlugin implements Plugin
 {
+    protected ?string $prefix = null;
+
+    /**
+     * @var array<string>
+     */
+    protected array $middleware = ['api', 'auth:sanctum', 'throttle:60,1'];
+
+    /**
+     * @var array<class-string>|null
+     */
+    protected ?array $resources = null;
+
+    /**
+     * @var array<class-string>
+     */
+    protected array $excludedResources = [];
+
+    /**
+     * @var array<string, array{model: class-string<Model>, filters: array<string>, sorts: array<string>, default_sort: string|null}>
+     */
+    protected array $models = [];
+
+    protected int $perPage = 15;
+
+    protected int $maxPerPage = 100;
+
     public function getId(): string
     {
         return 'filament-api';
@@ -33,5 +61,144 @@ class FilamentApiPlugin implements Plugin
         $plugin = filament(app(static::class)->getId());
 
         return $plugin;
+    }
+
+    /**
+     * The URL prefix of the API. Defaults to `api` for the default panel and `api/{panel-id}` for other panels.
+     */
+    public function prefix(string $prefix): static
+    {
+        $this->prefix = trim($prefix, '/');
+
+        return $this;
+    }
+
+    public function getPrefix(Panel $panel): string
+    {
+        return $this->prefix ?? ($panel->isDefault() ? 'api' : "api/{$panel->getId()}");
+    }
+
+    /**
+     * The middleware the API routes run through. It must authenticate the user, the API refuses guests.
+     *
+     * @param  array<string>  $middleware
+     */
+    public function middleware(array $middleware): static
+    {
+        $this->middleware = $middleware;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getMiddleware(): array
+    {
+        return $this->middleware;
+    }
+
+    /**
+     * Only expose these resources. By default, every resource of the panel is exposed.
+     *
+     * @param  array<class-string>  $resources
+     */
+    public function resources(array $resources): static
+    {
+        $this->resources = $resources;
+
+        return $this;
+    }
+
+    /**
+     * @param  array<class-string>  $resources
+     */
+    public function excludeResources(array $resources): static
+    {
+        $this->excludedResources = $resources;
+
+        return $this;
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public function getResources(Panel $panel): array
+    {
+        return array_values(array_filter(
+            $panel->getResources(),
+            fn (string $resource): bool => (($this->resources === null) || in_array($resource, $this->resources))
+                && (! in_array($resource, $this->excludedResources)),
+        ));
+    }
+
+    /**
+     * Expose models that have no Filament resource as read-only endpoints. Access is authorized with the
+     * model's policy (`viewAny` / `view`) when one exists.
+     *
+     * ```php
+     * ->models([
+     *     'tags' => Tag::class,
+     *     'payments' => ['model' => Payment::class, 'filters' => ['order_id'], 'sorts' => ['created_at']],
+     * ])
+     * ```
+     *
+     * `filters` are exact-match columns (`?filter[order_id]=1`), `sorts` are sortable columns (`?sort=-created_at`)
+     * and `default_sort` defaults to the primary key (set it for tables without an `id`, e.g. pivot tables).
+     *
+     * @param  array<string, class-string<Model>|array<string, mixed>>  $models
+     */
+    public function models(array $models): static
+    {
+        foreach ($models as $slug => $definition) {
+            $definition = is_array($definition) ? $definition : ['model' => $definition];
+
+            if (! is_subclass_of($definition['model'] ?? null, Model::class)) {
+                throw new InvalidArgumentException("The API endpoint [{$slug}] must be mapped to an Eloquent model.");
+            }
+
+            $this->models[trim($slug, '/')] = [
+                'model' => $definition['model'],
+                'filters' => $definition['filters'] ?? [],
+                'sorts' => $definition['sorts'] ?? [],
+                'default_sort' => array_key_exists('default_sort', $definition)
+                    ? $definition['default_sort']
+                    : app($definition['model'])->getKeyName(),
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, array{model: class-string<Model>, filters: array<string>, sorts: array<string>, default_sort: string|null}>
+     */
+    public function getModels(): array
+    {
+        return $this->models;
+    }
+
+    public function perPage(int $perPage): static
+    {
+        $this->perPage = $perPage;
+
+        return $this;
+    }
+
+    public function getPerPage(): int
+    {
+        return $this->perPage;
+    }
+
+    public function maxPerPage(int $maxPerPage): static
+    {
+        $this->maxPerPage = $maxPerPage;
+
+        return $this;
+    }
+
+    public function getMaxPerPage(): int
+    {
+        return $this->maxPerPage;
     }
 }

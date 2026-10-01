@@ -2,6 +2,18 @@
 
 All notable changes to `filament-api` will be documented in this file.
 
+## Unreleased
+
+- The API is enabled per panel with `FilamentApiPlugin`, and the `filament-api` config file was removed.
+- Endpoints mirror the resource slugs (e.g. `api/shop/orders`), and each panel gets its own routes.
+- Requests require an authenticated user who can access the panel. They are authorized with the resource's policies.
+- Listing uses the resource's table: its filters, search, sortable columns and tabs.
+- Creating and updating go through the resource's form and its create / edit pages.
+- Relation managers are exposed as nested endpoints.
+- Models without a resource can be exposed as read-only endpoints with `->models()`.
+- `per_page` is capped by `->maxPerPage()`. Deleting returns `204`, and unsupported methods return `405`.
+- Removed the endpoints that were discovered from model relationships.
+
 ## 1.0.0 - 202X-XX-XX
 
 - initial release
