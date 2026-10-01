@@ -5,6 +5,7 @@ use Allandereal\FilamentApi\Http\Controllers\AuthController;
 use Allandereal\FilamentApi\Http\Controllers\ModelController;
 use Allandereal\FilamentApi\Http\Controllers\ResourceController;
 use Allandereal\FilamentApi\Http\Middleware\CheckTokenAbilities;
+use Allandereal\FilamentApi\Http\Middleware\ExtendLoginToken;
 use Allandereal\FilamentApi\Http\Middleware\ForceJsonResponse;
 use Allandereal\FilamentApi\Http\Middleware\LogApiRequest;
 use Allandereal\FilamentApi\Http\Middleware\ServeFilamentApi;
@@ -54,6 +55,7 @@ foreach (FilamentApi::getPanels() as $panel) {
                 ForceJsonResponse::class,
                 ...$plugin->getMiddleware(),
                 ServeFilamentApi::class . ":{$panel->getId()}",
+                ExtendLoginToken::class,
             ])
             ->group(function (): void {
                 Route::get('user', [AuthController::class, 'user'])->name('user');
@@ -73,6 +75,7 @@ foreach (FilamentApi::getPanels() as $panel) {
             ServeFilamentApi::class . ":{$panel->getId()}",
             IdentifyTenant::class,
             CheckTokenAbilities::class,
+            ExtendLoginToken::class,
         ])
         ->group(function () use ($endpoint, $models, $resources): void {
             $read = TokenAbilities::READ;

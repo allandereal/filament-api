@@ -34,7 +34,8 @@ class AuthController extends Controller
         $data = $request->validate([
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'device_name' => ['nullable', 'string', 'max:100'],
+            'device_name' => ['nullable', 'string', 'max:255'],
+            'expires_in' => ['nullable', 'integer', 'min:60'],
         ]);
 
         $throttleKey = 'filament-api-login:' . $panel->getId() . ':' . Str::transliterate(Str::lower($data['email'])) . '|' . $request->ip();
@@ -77,14 +78,26 @@ class AuthController extends Controller
         $days = FilamentApi::getPlugin($panel)->getLoginTokenLifetime();
         $expiresAt = $days ? now()->addDays($days) : null;
 
-        $device = $data['device_name'] ?? null;
-        $device = filled($device) ? $device : (Str::limit((string) $request->userAgent(), 100, '') ?: 'API client');
-
         // The token can do everything the user can do, in this panel only.
-        $token = $user->createToken("Login: {$device}", [
+        $abilities = [
             TokenAbilities::readEverything($panel->getId()),
             TokenAbilities::writeEverything($panel->getId()),
-        ], $expiresAt);
+        ];
+
+        // With `expires_in`, the token expires after that many seconds without a request, like the client's session,
+        // but never later than the token lifetime.
+        if ($idleSeconds = $data['expires_in'] ?? null) {
+            $idleSeconds = $days ? min((int) $idleSeconds, $days * 86400) : (int) $idleSeconds;
+
+            $abilities[] = TokenAbilities::idle($idleSeconds);
+            $expiresAt = now()->addSeconds($idleSeconds);
+        }
+
+        $device = $data['device_name'] ?? null;
+        $device = filled($device) ? $device : ((string) $request->userAgent() ?: 'API client');
+
+        // Sanctum's `name` column holds 255 characters.
+        $token = $user->createToken(Str::limit("Login: {$device}", 255, ''), $abilities, $expiresAt);
 
         // Record the user in the request logs.
         $request->setUserResolver(fn () => $user);

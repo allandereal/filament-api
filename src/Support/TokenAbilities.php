@@ -2,6 +2,8 @@
 
 namespace Allandereal\FilamentApi\Support;
 
+use Carbon\CarbonInterval;
+
 /**
  * API tokens are scoped with Sanctum abilities:
  *
@@ -16,6 +18,12 @@ class TokenAbilities
 
     public const WRITE = 'write';
 
+    /**
+     * Login tokens that expire after a period of inactivity store its length in seconds in an ability, so that no
+     * column has to be added to Sanctum's table. It never grants access: abilities that do have three parts.
+     */
+    public const IDLE_PREFIX = 'filament-api-idle:';
+
     public static function make(string $panel, string $endpoint, string $action): string
     {
         return "{$panel}:{$endpoint}:{$action}";
@@ -29,6 +37,27 @@ class TokenAbilities
     public static function writeEverything(string $panel): string
     {
         return static::make($panel, '*', static::WRITE);
+    }
+
+    public static function idle(int $seconds): string
+    {
+        return static::IDLE_PREFIX . $seconds;
+    }
+
+    /**
+     * The inactivity period of a login token, in seconds, or `null` if the token has a fixed expiry.
+     *
+     * @param  array<string>  $abilities
+     */
+    public static function getIdleSeconds(array $abilities): ?int
+    {
+        foreach ($abilities as $ability) {
+            if (str_starts_with($ability, static::IDLE_PREFIX)) {
+                return (int) substr($ability, strlen(static::IDLE_PREFIX)) ?: null;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -51,6 +80,12 @@ class TokenAbilities
     {
         if ($ability === '*') {
             return 'Full access';
+        }
+
+        if (str_starts_with($ability, static::IDLE_PREFIX)) {
+            $seconds = (int) substr($ability, strlen(static::IDLE_PREFIX));
+
+            return 'Expires after ' . CarbonInterval::seconds($seconds)->cascade()->forHumans() . ' idle';
         }
 
         $parts = explode(':', $ability);

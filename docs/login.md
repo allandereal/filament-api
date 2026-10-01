@@ -30,7 +30,9 @@ Content-Type: application/json
 {"email": "ada@example.com", "password": "secret", "device_name": "Ada's laptop"}
 ```
 
-`device_name` is optional. It names the token on the API tokens page, as `Login: Ada's laptop`. Without it, the token is named after the request's user agent.
+`device_name` is optional. It names the token on the API tokens page, as `Login: Ada's laptop`. Without it, the token is named after the request's user agent. Names are cut to fit Sanctum's 255 characters.
+
+`expires_in` is optional too: see [Expiring with the client's session](#expiring-with-the-clients-session).
 
 On success, the response is `200 OK`:
 
@@ -56,15 +58,33 @@ The user is looked up with the user provider of the panel's auth guard, so the A
 ## Tokens issued by the login
 
 - **Access**: the token can do everything the user can do in this panel (`{panel}:*:read` and `{panel}:*:write`), and nothing in other panels. The user's [policies](authorization.md) still apply.
-- **Expiration**: 30 days by default. Clients get `401` once the token expires, and should then ask the user to log in again.
+- **Expiration**: 30 days by default, or after a period of inactivity with [`expires_in`](#expiring-with-the-clients-session). Clients get `401` once the token expires, and should then ask the user to log in again.
 - **One token per login**: each login creates a new token, so a user can be logged in on several devices. Users see these tokens on the API tokens page, and can revoke them there.
 
 ```php
 FilamentApiPlugin::make()
     ->login()
-    ->loginTokenLifetime(days: 7)   // Expire after 7 days
-    ->loginTokenLifetime(null)      // Or never expire
+    ->loginTokenLifetime(days: 7)   // Expire after 7 days, at most
+    ->loginTokenLifetime(null)      // Or no limit: tokens with `expires_in` stay valid while they're used
 ```
+
+## Expiring with the client's session
+
+By default, a login token expires a fixed number of days after the login. When a client's own session expires without logging out, it forgets the token, but the token would stay valid until then. To make the token expire with the client's session instead, send the session's idle lifetime in seconds as `expires_in`:
+
+```json
+{"email": "ada@example.com", "password": "secret", "expires_in": 7200}
+```
+
+The token then expires after `expires_in` seconds **without a request**. Each request made with it pushes the expiry back, so it stays valid while the client uses it, like a session. A token that isn't used for that long gets `401`.
+
+- `expires_in` must be at least 60 seconds. It's capped at `->loginTokenLifetime()`.
+- The expiry is never pushed past the token's lifetime: with the default of 30 days, a token expires 30 days after the login, even if it's used every day.
+- To avoid a database write on every request, the expiry is only saved when it moves by more than a minute.
+- The login response's `expires_at` is the expiry at the time of the login. Clients should rely on the `401` rather than on `expires_at`.
+- The idle time is stored on the token as an ability, `filament-api-idle:{seconds}`. It grants no access, and the API tokens page shows it as "Expires after 2 hours idle".
+
+Tokens created on the [API tokens](tokens.md) page, and login tokens without `expires_in`, keep their fixed expiry.
 
 ## The current user
 

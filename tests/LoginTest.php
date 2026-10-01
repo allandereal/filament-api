@@ -1,7 +1,10 @@
 <?php
 
+use Allandereal\FilamentApi\Facades\FilamentApi;
 use Allandereal\FilamentApi\Models\ApiRequest;
+use Allandereal\FilamentApi\Support\TokenAbilities;
 use Allandereal\FilamentApi\Tests\Fixtures\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -153,5 +156,115 @@ describe('logout', function () {
         forgetAuthentication();
 
         $this->withToken($other)->getJson('api/user')->assertOk();
+    });
+});
+
+describe('idle expiry', function () {
+    function loginFor(int $seconds): string
+    {
+        return postJson('api/login', [
+            'email' => 'ada@example.com',
+            'password' => 'correct-password',
+            'expires_in' => $seconds,
+        ])->assertOk()->json('token');
+    }
+
+    it('expires the token after the idle time', function () {
+        $this->freezeSecond();
+
+        $response = postJson('api/login', ['email' => 'ada@example.com', 'password' => 'correct-password', 'expires_in' => 600])
+            ->assertOk()
+            ->assertJsonPath('expires_at', now()->addMinutes(10)->toIso8601String());
+
+        $token = PersonalAccessToken::findToken($response->json('token'));
+
+        expect($token->abilities)->toBe(['admin:*:read', 'admin:*:write', 'filament-api-idle:600'])
+            ->and($token->expires_at->equalTo(now()->addMinutes(10)))->toBeTrue();
+    });
+
+    it('keeps the token alive while it is used', function () {
+        $plainTextToken = loginFor(600);
+
+        $this->travel(8)->minutes();
+        forgetAuthentication();
+        $this->withToken($plainTextToken)->getJson('api/posts')->assertOk();
+
+        $this->travel(8)->minutes();
+        forgetAuthentication();
+        $this->withToken($plainTextToken)->getJson('api/user')->assertOk();
+
+        // 11 minutes without a request.
+        $this->travel(11)->minutes();
+        forgetAuthentication();
+        $this->withToken($plainTextToken)->getJson('api/user')->assertUnauthorized();
+    });
+
+    it('only writes the expiry when it moves by more than a minute', function () {
+        $plainTextToken = loginFor(600);
+        $expiresAt = PersonalAccessToken::findToken($plainTextToken)->expires_at;
+
+        $this->travel(30)->seconds();
+        forgetAuthentication();
+        $this->withToken($plainTextToken)->getJson('api/user')->assertOk();
+
+        expect(PersonalAccessToken::findToken($plainTextToken)->expires_at->equalTo($expiresAt))->toBeTrue();
+    });
+
+    it('never extends the token past its lifetime', function () {
+        $this->freezeSecond();
+
+        $plainTextToken = loginFor(7200);
+
+        // A token created almost 30 days ago, which has been kept alive since, with 5 minutes left.
+        $token = PersonalAccessToken::findToken($plainTextToken);
+        $token->forceFill([
+            'created_at' => now()->subDays(30)->addMinutes(10),
+            'expires_at' => now()->addMinutes(5),
+        ])->save();
+
+        forgetAuthentication();
+        $this->withToken($plainTextToken)->getJson('api/user')->assertOk();
+
+        // Extended to the end of the 30 day lifetime, 10 minutes away, not by the 2 hour idle time.
+        expect($token->refresh()->expires_at->equalTo(now()->addMinutes(10)))->toBeTrue();
+    });
+
+    it('caps the idle time at the token lifetime', function () {
+        FilamentApi::getPlugin(Filament::getPanel('admin'))->loginTokenLifetime(1);
+
+        $token = PersonalAccessToken::findToken(loginFor(7 * 86400));
+
+        expect($token->abilities)->toContain('filament-api-idle:86400');
+    });
+
+    it('validates the idle time', function () {
+        postJson('api/login', ['email' => 'ada@example.com', 'password' => 'correct-password', 'expires_in' => 30])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('expires_in');
+    });
+
+    it('does not extend tokens with a fixed expiry', function () {
+        $this->freezeSecond();
+
+        $token = $this->user->createToken('Integration', ['*'], $expiresAt = now()->addHour());
+
+        $this->travel(30)->minutes();
+        $this->withToken($token->plainTextToken)->getJson('api/user')->assertOk();
+
+        expect($token->accessToken->refresh()->expires_at->equalTo($expiresAt))->toBeTrue();
+    });
+
+    it('shows the idle time on the tokens page', function () {
+        expect(TokenAbilities::getLabel('filament-api-idle:7200'))->toBe('Expires after 2 hours idle');
+    });
+
+    it('accepts long device names', function () {
+        $token = postJson('api/login', [
+            'email' => 'ada@example.com',
+            'password' => 'correct-password',
+            'device_name' => str_repeat('a', 250),
+        ])->assertOk()->json('token');
+
+        expect(mb_strlen(PersonalAccessToken::findToken($token)->name))->toBe(255);
     });
 });
