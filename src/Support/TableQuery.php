@@ -19,6 +19,9 @@ use Livewire\Component;
  * - `?search=foo` applies the table's global search over its searchable columns.
  * - `?sort=-total_price` sorts by a sortable column, `-` for descending.
  * - `?tab=processing` activates a tab of the list page.
+ *
+ * The record key can always be used to filter (`?filter[id]=1,2,3`) and sort (`?sort=-id`), even if the table
+ * doesn't declare it, so that API clients can batch-load records and page through them in a stable order.
  */
 class TableQuery
 {
@@ -33,6 +36,12 @@ class TableQuery
         }
 
         $table = $livewire->getTable();
+
+        $model = $table->getQuery()->getModel();
+        $keyName = $model->getKeyName();
+
+        $keyFilter = null;
+        $keySortDirection = null;
 
         $errors = [];
 
@@ -49,9 +58,21 @@ class TableQuery
         // state as active, so skipping this would apply every filter.
         $livewire->getTableFiltersForm()->fill();
 
+        // With deferred filters, the form fills `tableDeferredFilters`, which the panel only copies to the
+        // applied `tableFilters` when the user clicks "Apply".
+        if ($table->hasDeferredFilters()) {
+            $livewire->tableFilters = $livewire->tableDeferredFilters;
+        }
+
         foreach ($filters as $name => $value) {
+            if (($name === $keyName) && (! array_key_exists($name, $availableFilters))) {
+                $keyFilter = is_array($value) ? array_values($value) : explode(',', (string) $value);
+
+                continue;
+            }
+
             if (! array_key_exists($name, $availableFilters)) {
-                $errors["filter.{$name}"] = static::unknown('filter', $name, array_keys($availableFilters));
+                $errors["filter.{$name}"] = static::unknown('filter', $name, [$keyName, ...array_keys($availableFilters)]);
 
                 continue;
             }
@@ -75,13 +96,15 @@ class TableQuery
         if (filled($sort = $request->query('sort'))) {
             $column = is_string($sort) ? ltrim($sort, '-') : '';
 
-            if (! $table->getSortableVisibleColumn($column)) {
+            if (($column === $keyName) && (! $table->getSortableVisibleColumn($column))) {
+                $keySortDirection = str_starts_with($sort, '-') ? 'desc' : 'asc';
+            } elseif (! $table->getSortableVisibleColumn($column)) {
                 $sortable = collect($table->getColumns())
                     ->filter(fn ($column): bool => $column->isSortable() && (! $column->isHidden()))
                     ->keys()
                     ->all();
 
-                $errors['sort'] = static::unknown('sort', $column, $sortable);
+                $errors['sort'] = static::unknown('sort', $column, [$keyName, ...$sortable]);
             } else {
                 $livewire->tableSortColumn = $column;
                 $livewire->tableSortDirection = str_starts_with($sort, '-') ? 'desc' : 'asc';
@@ -102,7 +125,17 @@ class TableQuery
             throw ValidationException::withMessages($errors);
         }
 
-        return $livewire->getFilteredSortedTableQuery();
+        $query = $livewire->getFilteredSortedTableQuery();
+
+        if ($keyFilter !== null) {
+            $query->whereIn($model->getQualifiedKeyName(), $keyFilter);
+        }
+
+        if ($keySortDirection) {
+            $query->reorder($model->getQualifiedKeyName(), $keySortDirection);
+        }
+
+        return $query;
     }
 
     /**

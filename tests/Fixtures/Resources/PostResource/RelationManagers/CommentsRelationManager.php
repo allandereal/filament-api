@@ -5,6 +5,7 @@ namespace Allandereal\FilamentApi\Tests\Fixtures\Resources\PostResource\Relation
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CommentsRelationManager extends RelationManager
 {
@@ -12,8 +13,13 @@ class CommentsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return $table->columns([
-            Tables\Columns\TextColumn::make('body')->searchable(),
-        ]);
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('body')->searchable(),
+            ])
+            ->filters([
+                Tables\Filters\Filter::make('long')
+                    ->query(fn (Builder $query): Builder => $query->where('body', 'like', '%long%')),
+            ]);
     }
 }

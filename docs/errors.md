@@ -4,13 +4,12 @@ Errors are JSON responses with a `message`, and an `errors` object for validatio
 
 | Status | When |
 |---|---|
-| `400 Bad Request` | A model endpoint received a filter or sort that isn't allowed. |
 | `401 Unauthorized` | The request isn't authenticated. |
-| `403 Forbidden` | The user can't access the panel, or the resource's policy denies the action. |
+| `403 Forbidden` | The user can't access the panel, the resource's policy denies the action, or the API token doesn't have access to the endpoint. |
 | `404 Not Found` | The endpoint doesn't exist, or the record doesn't exist or is outside the resource's query. On panels with tenancy, the user can't access the tenant. |
 | `405 Method Not Allowed` | The endpoint doesn't support the method, for example `POST /api/posts/1`, or writes on a model endpoint. |
 | `422 Unprocessable Entity` | Validation failed, or a filter, sort, tab or pagination parameter is invalid, or a page hook halted the creation. |
-| `429 Too Many Requests` | The rate limiter rejected the request. |
+| `429 Too Many Requests` | The rate limiter rejected the request. The `Retry-After` header says how many seconds to wait. See [Rate limiting](configuration.md#rate-limiting). |
 
 ## Validation errors
 

@@ -6,7 +6,10 @@ use Allandereal\FilamentApi\Http\Resources\ApiResource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\ValidationException;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\Exceptions\InvalidFilterQuery;
+use Spatie\QueryBuilder\Exceptions\InvalidSortQuery;
 use Spatie\QueryBuilder\QueryBuilder;
 
 use function Filament\authorize;
@@ -25,12 +28,19 @@ class ModelController extends Controller
 
         authorize('viewAny', $model);
 
-        $query = QueryBuilder::for($model, $request)
-            ->allowedFilters(array_map(
-                fn (string $filter): AllowedFilter => AllowedFilter::exact($filter),
-                $definition['filters'],
-            ))
-            ->allowedSorts($definition['sorts']);
+        // Invalid filters and sorts are reported as validation errors, like on resource endpoints.
+        try {
+            $query = QueryBuilder::for($model, $request)
+                ->allowedFilters(array_map(
+                    fn (string $filter): AllowedFilter => AllowedFilter::exact($filter),
+                    $definition['filters'],
+                ))
+                ->allowedSorts($definition['sorts']);
+        } catch (InvalidFilterQuery $exception) {
+            throw ValidationException::withMessages(['filter' => $exception->getMessage()]);
+        } catch (InvalidSortQuery $exception) {
+            throw ValidationException::withMessages(['sort' => $exception->getMessage()]);
+        }
 
         if ($definition['default_sort']) {
             $query->defaultSort($definition['default_sort']);

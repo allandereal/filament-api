@@ -13,6 +13,10 @@ All notable changes to `filament-api` will be documented in this file.
 - Models without a resource can be exposed as read-only endpoints with `->models()`.
 - `per_page` is capped by `->maxPerPage()`. Deleting returns `204`, and unsupported methods return `405`.
 - Removed the endpoints that were discovered from model relationships.
+- Added an API tokens page where users create, scope and revoke their Sanctum tokens. Token abilities are checked on every request.
+- Resource endpoints can always be filtered (`filter[id]=1,2`) and sorted (`sort=-id`) by the record key.
+- Fixed listing tables with deferred filters, which crashed on query builder filters.
+- Model endpoints answer `422` instead of `400` for filters and sorts that aren't allowed.
 
 ## 1.0.0 - 202X-XX-XX
 

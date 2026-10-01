@@ -31,7 +31,18 @@ A nested array (`filter[name][field]=value`) is passed to the filter as its form
 
 `TrashedFilter` values: `1` lists all records including deleted ones, `0` only deleted ones, and leaving it out hides deleted ones.
 
-Filters you leave out keep their default state, like in the panel.
+Filters you leave out keep their default state, like in the panel. This includes tables with deferred filters (`->deferFilters()`), where the filters apply right away in the API: there is no "Apply" button to press.
+
+### Filtering by key
+
+You can always filter by the record's primary key, even if the table has no filter for it. Separate several keys with commas:
+
+```
+?filter[id]=1,2,3
+?filter[id][]=1&filter[id][]=2
+```
+
+This is useful to load several records in one request instead of one request per record. If the table has its own filter with the same name, that filter is used instead.
 
 ## Searching
 
@@ -50,6 +61,8 @@ If the table has no searchable column, `search` is rejected.
 ```
 
 Columns that are hidden or not sortable are rejected. When `sort` is left out, the table's default sort applies.
+
+You can always sort by the record's primary key (`?sort=id` or `?sort=-id`), even if the table doesn't have a sortable column for it. It replaces the table's default sort, which gives you a stable order to page through records.
 
 ## Tabs
 

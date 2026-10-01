@@ -86,6 +86,8 @@ Relationships that are part of the form are saved with the record, the same way 
 - **Repeater with `->relationship()`**: send the list of items. On update, the list you send **replaces** all the existing items, and items that aren't in it are deleted. To keep the items, leave the field out.
 - **Group, Fieldset or Section with `->relationship()`**: send an object with the related fields, like `address` above.
 
+Send relationship fields as part of the parent record's request. Pivot and child models exposed as [model endpoints](models.md), such as order items or taggables, are read-only, so they can't be written to directly.
+
 ## Validation errors
 
 A request that fails the form's validation is rejected with `422 Unprocessable Entity`. Errors use the field names, with dots for nested fields:

@@ -27,12 +27,39 @@ The package has no config file.
 | `models(array $models)` | `[]` | Read-only endpoints for models without a resource. See [Models without a resource](models.md). |
 | `perPage(int $perPage)` | `15` | The default page size. |
 | `maxPerPage(int $maxPerPage)` | `100` | The largest `per_page` a client can request. |
+| `tokens(bool $condition = true)` | `true` | Add the [API tokens](tokens.md) page to the panel. |
+| `tokensNavigationGroup(?string $group)` | `null` | The navigation group of the API tokens page. |
 
-The middleware you set replaces the default list, so include an authentication middleware and a rate limiter. The package always adds three middleware of its own around your list:
+The middleware you set replaces the default list, so include an authentication middleware and a rate limiter. The package always adds middleware of its own around your list:
 
 1. Before your list, it forces JSON responses.
 2. After your list, it sets up the panel and checks that the user can access it.
 3. On panels with tenancy, it then identifies the tenant.
+4. Last, it checks the [abilities of the API token](tokens.md#access-levels), if the request uses one.
+
+## Rate limiting
+
+The default middleware allows 60 requests per minute per user (`throttle:60,1`). That's enough for most integrations, but clients that load records one by one, such as an Eloquent driver backed by the API, can need many requests to render a single page. Raise the limit for them:
+
+```php
+FilamentApiPlugin::make()
+    ->middleware(['api', 'auth:sanctum', 'throttle:600,1'])
+```
+
+Or use a [named rate limiter](https://laravel.com/docs/routing#rate-limiting) to give different users different limits:
+
+```php
+// AppServiceProvider::boot()
+RateLimiter::for('filament-api', fn (Request $request) => $request->user()?->is_integration
+    ? Limit::perMinute(1000)->by($request->user()->id)
+    : Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
+
+// The panel provider
+FilamentApiPlugin::make()
+    ->middleware(['api', 'auth:sanctum', 'throttle:filament-api'])
+```
+
+Rejected requests get `429 Too Many Requests` with a `Retry-After` header. Clients can also batch their reads with [`filter[id]=1,2,3`](listing.md#filtering-by-key) to need fewer requests.
 
 ## Choosing resources
 

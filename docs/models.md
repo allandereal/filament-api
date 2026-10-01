@@ -43,7 +43,7 @@ Each model gets two routes:
 
 Other methods get `405 Method Not Allowed`.
 
-Filters and sorts that aren't allowed are rejected with `400 Bad Request`. Filtering and sorting use [spatie/laravel-query-builder](https://spatie.be/docs/laravel-query-builder).
+Filters and sorts that aren't allowed are rejected with `422 Unprocessable Entity`, like on resource endpoints. Filtering and sorting use [spatie/laravel-query-builder](https://spatie.be/docs/laravel-query-builder).
 
 The responses have the same format as resource endpoints: see [Response](listing.md#response).
 

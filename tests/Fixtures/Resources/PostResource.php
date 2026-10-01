@@ -42,7 +42,13 @@ class PostResource extends Resource
                     ->options(['draft' => 'Draft', 'published' => 'Published', 'locked' => 'Locked']),
                 Tables\Filters\Filter::make('has_body')
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('body')),
-            ]);
+                Tables\Filters\QueryBuilder::make()
+                    ->constraints([
+                        Tables\Filters\QueryBuilder\Constraints\TextConstraint::make('title'),
+                    ]),
+            ])
+            // Deferred filters keep their form state apart from the applied state.
+            ->deferFilters();
     }
 
     public static function getRelations(): array

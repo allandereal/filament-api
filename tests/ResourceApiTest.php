@@ -87,6 +87,29 @@ describe('index', function () {
             ->assertJsonPath('data.0.title', 'Apple');
     });
 
+    it('applies the default state of deferred filters', function () {
+        // The table defers its filters, and has a query builder filter that needs its default state.
+        getJson('api/posts?per_page=5')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 3);
+    });
+
+    it('filters and sorts by the record key', function () {
+        $ids = Post::orderBy('id')->pluck('id');
+
+        getJson("api/posts?filter[id]={$ids[0]},{$ids[2]}&sort=-id")
+            ->assertOk()
+            ->assertJsonPath('data.*.id', [$ids[2], $ids[0]]);
+
+        getJson("api/posts?filter[id][]={$ids[1]}")
+            ->assertOk()
+            ->assertJsonPath('data.*.id', [$ids[1]]);
+
+        getJson('api/posts?sort=id&per_page=5')
+            ->assertOk()
+            ->assertJsonPath('data.*.id', $ids->all());
+    });
+
     it('rejects unknown filters', function () {
         getJson('api/posts?filter[title]=Apple')
             ->assertUnprocessable()
@@ -264,8 +287,8 @@ describe('models', function () {
     });
 
     it('rejects filters and sorts that are not allowed', function () {
-        getJson('api/secrets?filter[id]=1')->assertStatus(400);
-        getJson('api/secrets?sort=created_at')->assertStatus(400);
+        getJson('api/secrets?filter[id]=1')->assertUnprocessable()->assertJsonValidationErrors('filter');
+        getJson('api/secrets?sort=created_at')->assertUnprocessable()->assertJsonValidationErrors('sort');
     });
 
     it('is read-only', function () {
