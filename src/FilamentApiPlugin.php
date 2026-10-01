@@ -2,6 +2,7 @@
 
 namespace Allandereal\FilamentApi;
 
+use Allandereal\FilamentApi\Pages\ApiTokens;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +36,10 @@ class FilamentApiPlugin implements Plugin
 
     protected int $maxPerPage = 100;
 
+    protected bool $hasTokens = true;
+
+    protected ?string $tokensNavigationGroup = null;
+
     public function getId(): string
     {
         return 'filament-api';
@@ -42,7 +47,9 @@ class FilamentApiPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        //
+        if ($this->hasTokens()) {
+            $panel->pages([ApiTokens::class]);
+        }
     }
 
     public function boot(Panel $panel): void
@@ -200,5 +207,33 @@ class FilamentApiPlugin implements Plugin
     public function getMaxPerPage(): int
     {
         return $this->maxPerPage;
+    }
+
+    /**
+     * Add the API tokens page to the panel, where users create and revoke their Sanctum tokens.
+     * The page is only shown to users whose model uses Sanctum's `HasApiTokens` trait.
+     */
+    public function tokens(bool $condition = true): static
+    {
+        $this->hasTokens = $condition;
+
+        return $this;
+    }
+
+    public function hasTokens(): bool
+    {
+        return $this->hasTokens;
+    }
+
+    public function tokensNavigationGroup(?string $group): static
+    {
+        $this->tokensNavigationGroup = $group;
+
+        return $this;
+    }
+
+    public function getTokensNavigationGroup(): ?string
+    {
+        return $this->tokensNavigationGroup;
     }
 }

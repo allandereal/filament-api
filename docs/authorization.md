@@ -1,6 +1,6 @@
 # Authorization
 
-Every request goes through three checks, in this order.
+Every request goes through these checks, in this order.
 
 ## 1. Authentication
 
@@ -51,6 +51,16 @@ As in Filament:
 
 Records are also limited to the resource's query, `Resource::getEloquentQuery()`. A record outside of it, for example in another tenant, gets `404`.
 
+## 4. Token abilities
+
+If the request is authenticated with an API token, the token must have access to the endpoint: read access for `GET` requests, and write access for `POST`, `PUT`, `PATCH` and `DELETE` requests. Otherwise the API responds with `403`:
+
+```json
+{"message": "This API token doesn't have write access to shop/orders."}
+```
+
+Abilities only narrow down what the user can do. They never grant something the user's policies deny. See [API tokens](tokens.md#access-levels).
+
 ## Model endpoints
 
 [Models without a resource](models.md) are authorized with the model's policy: `viewAny` to list records and `view` to show one. If the model has no policy, any user who passes the first two checks can read them.
@@ -59,4 +69,5 @@ Records are also limited to the resource's query, `Resource::getEloquentQuery()`
 
 - Expose only some resources with `->resources([...])` or `->excludeResources([...])`. See [Configuration](configuration.md#choosing-resources).
 - Use `$hidden` on your models for attributes that must never be returned, such as passwords and tokens.
+- Give each integration its own token, with only the access it needs. See [API tokens](tokens.md).
 - Use separate panels with different plugin settings for different kinds of API clients.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Allandereal\FilamentApi\Pages;
+namespace Allandereal\FilamentApi\Support\Pages;
 
 use Filament\Resources\Pages\EditRecord as BaseEditRecord;
 

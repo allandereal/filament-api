@@ -3,8 +3,8 @@
 namespace Allandereal\FilamentApi\Http\Controllers;
 
 use Allandereal\FilamentApi\Http\Resources\ApiResource;
-use Allandereal\FilamentApi\Pages\CreateRecord;
-use Allandereal\FilamentApi\Pages\EditRecord;
+use Allandereal\FilamentApi\Support\Pages\CreateRecord;
+use Allandereal\FilamentApi\Support\Pages\EditRecord;
 use Allandereal\FilamentApi\Support\TableQuery;
 use Closure;
 use Filament\Resources\Pages\CreateRecord as BaseCreateRecord;

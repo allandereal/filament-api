@@ -13,6 +13,7 @@ class FilamentApiServiceProvider extends PackageServiceProvider
     {
         $package
             ->name(static::$name)
+            ->hasViews()
             ->hasRoute('api');
     }
 

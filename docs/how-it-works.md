@@ -12,7 +12,7 @@ The package doesn't reimplement Filament. Each API request drives the same Livew
 2. builds the endpoints of each panel from its resources (`FilamentApi::getResourceEndpoints()`), relation managers (`FilamentApi::getRelationManagers()`) and the plugin's `models()`
 3. registers the routes. Collection routes are registered before record routes, so that `shop/products` (a collection) is never matched as the record `products` of a `shop` endpoint.
 
-Each route stores the resource, relation manager or model in its route defaults (`filamentApiResource`, `filamentApiRelationManager`, `filamentApiModel`). These defaults are strings, so the routes can be cached.
+Each route stores the resource, relation manager or model in its route defaults (`filamentApiResource`, `filamentApiRelationManager`, `filamentApiModel`), along with its endpoint and whether it reads or writes (`filamentApiEndpoint`, `filamentApiAbility`). These defaults are strings, so the routes can be cached.
 
 ## Middleware
 
@@ -26,6 +26,7 @@ Each route runs through:
    - sets the user on the panel's auth guard, because Filament authorizes with `Filament::auth()->user()`, which is usually the session guard and not the API guard
    - dispatches `ServingFilament`
 4. Filament's `IdentifyTenant`, which resolves the `{tenant}` URL segment on panels with tenancy.
+5. `CheckTokenAbilities`, which checks the abilities of the request's API token against the route's `filamentApiEndpoint` and `filamentApiAbility` defaults (`read` or `write`). It uses `Support\TokenAbilities`, and skips requests without a token.
 
 ## Listing: `TableQuery`
 
@@ -43,12 +44,16 @@ The controller then paginates the query.
 
 ## Writing: the create and edit pages
 
-`store()` creates the resource's create page (a `CreateRecord` component), and `update()` creates its edit page (`EditRecord`). For resources without these pages, it uses `Pages\CreateRecord` or `Pages\EditRecord`, which are minimal pages bound to the resource at runtime. Then the controller:
+`store()` creates the resource's create page (a `CreateRecord` component), and `update()` creates its edit page (`EditRecord`). For resources without these pages, it uses `Support\Pages\CreateRecord` or `Support\Pages\EditRecord`, which are minimal pages bound to the resource at runtime. Then the controller:
 
 1. calls `mount()`, which authorizes and fills the form with defaults (create) or with the record (edit)
 2. merges the request body into the form state (`$page->data`), keeping only the keys the state already has
 3. calls `create()` or `save(shouldRedirect: false, shouldSendSavedNotification: false)`. This validates the form, dehydrates it, runs the page's hooks and saves the record and its relationships
 4. catches the `ValidationException` and renames the keys from `data.title` to `title`
+
+## The API tokens page
+
+`Pages\ApiTokens` is a regular Filament page with a table, registered by `FilamentApiPlugin::register()`. Its table queries the user's `tokens()` relationship, so users can only see and revoke their own tokens. Creating a token turns the chosen access into abilities, keeping only endpoints that exist, and calls Sanctum's `createToken()`. The plain-text token is kept in a locked Livewire property until the user dismisses it.
 
 ## Model endpoints
 
@@ -56,7 +61,7 @@ The controller then paginates the query.
 
 ## Tests
 
-The tests use Orchestra Testbench with a test panel in `tests/Fixtures`. It has a resource with create and edit pages, filters, tabs, a policy and a relation manager, a simple resource, and a panel without the plugin. Run them with:
+The tests use Orchestra Testbench with a test panel in `tests/Fixtures`. It has a resource with create and edit pages, filters, tabs, a policy and a relation manager, a simple resource, a user with Sanctum tokens, and a panel without the plugin. Run them with:
 
 ```bash
 composer test

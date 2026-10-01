@@ -23,7 +23,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugin(
                 FilamentApiPlugin::make()
-                    ->middleware(['api', 'auth'])
+                    ->middleware(['api', 'auth:sanctum'])
                     ->perPage(2)
                     ->maxPerPage(5)
                     ->models([

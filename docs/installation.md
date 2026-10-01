@@ -51,13 +51,9 @@ class User extends Authenticatable implements FilamentUser
 }
 ```
 
-Issue a token, for example from a page in your panel or from Tinker:
+Users can now create tokens on the **API tokens** page that the plugin adds to the panel, and choose what each token can access. See [API tokens](tokens.md).
 
-```php
-$token = $user->createToken('my-integration')->plainTextToken;
-```
-
-Then send it with each request, along with `Accept: application/json`:
+Send the token with each request, along with `Accept: application/json`:
 
 ```bash
 curl https://example.com/api/shop/orders \
@@ -78,4 +74,5 @@ FilamentApiPlugin::make()
 ## Next steps
 
 - [Endpoints](endpoints.md) lists the URLs the API exposes.
+- [API tokens](tokens.md) explains how tokens are created and scoped.
 - [Authorization](authorization.md) explains which user can do what.
