@@ -87,6 +87,51 @@ describe('operator filters', function () {
     });
 });
 
+describe('column sorts', function () {
+    it('sorts by any visible column', function () {
+        // `views` and `status` aren't sortable columns of the table.
+        getJson('api/posts?sort=-views&per_page=5')
+            ->assertOk()
+            ->assertJsonPath('data.*.views', [100, 50, 30, 10]);
+
+        getJson('api/posts?sort=created_at&per_page=2')
+            ->assertOk()
+            ->assertJsonPath('data.*.title', ['Jan', 'Jan 2']);
+    });
+
+    it('still sorts by the table\'s sortable columns', function () {
+        getJson('api/posts?sort=-title&per_page=5')
+            ->assertOk()
+            ->assertJsonPath('data.*.title', ['Next year', 'Mar', 'Jan 2', 'Jan']);
+    });
+
+    it('combines with operator filters', function () {
+        getJson('api/posts?where[status][eq]=published&sort=-created_at&per_page=1')
+            ->assertOk()
+            ->assertJsonPath('data.*.title', ['Mar']);
+    });
+
+    it('rejects hidden and unknown columns', function () {
+        getJson('api/posts?sort=secret_note')->assertUnprocessable()->assertJsonValidationErrors('sort');
+        getJson('api/posts?sort=nope')->assertUnprocessable()->assertJsonValidationErrors('sort');
+    });
+
+    it('works on model endpoints', function () {
+        Secret::create(['name' => 'a']);
+        Secret::create(['name' => 'b']);
+
+        // `name` is one of the model endpoint's sorts, `id` isn't.
+        getJson('api/secrets?sort=-name')->assertOk()->assertJsonPath('data.*.name', ['b', 'a']);
+        getJson('api/secrets?sort=-id')->assertOk()->assertJsonPath('data.*.name', ['b', 'a']);
+    });
+
+    it('is off without operator filters', function () {
+        FilamentApi::getPlugin(Filament::getPanel('admin'))->operatorFilters(false);
+
+        getJson('api/posts?sort=-views')->assertUnprocessable()->assertJsonValidationErrors('sort');
+    });
+});
+
 describe('aggregates', function () {
     it('computes an aggregate of the whole query', function () {
         getJson('api/posts?aggregate=count:*')->assertExactJson(['data' => [['aggregate' => 4]]]);

@@ -1,10 +1,12 @@
 <?php
 
+use Allandereal\FilamentApi\Facades\FilamentApi;
 use Allandereal\FilamentApi\Tests\Fixtures\Models\Category;
 use Allandereal\FilamentApi\Tests\Fixtures\Models\Comment;
 use Allandereal\FilamentApi\Tests\Fixtures\Models\Post;
 use Allandereal\FilamentApi\Tests\Fixtures\Models\Secret;
 use Allandereal\FilamentApi\Tests\Fixtures\Models\User;
+use Filament\Facades\Filament;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\deleteJson;
@@ -124,6 +126,9 @@ describe('index', function () {
     });
 
     it('sorts by sortable columns only', function () {
+        // Without operator filters, which allow sorting by any visible column.
+        FilamentApi::getPlugin(Filament::getPanel('admin'))->operatorFilters(false);
+
         getJson('api/posts?sort=-title&per_page=5')
             ->assertOk()
             ->assertJsonPath('data.*.title', ['Cherry', 'Banana', 'Apple']);
@@ -287,6 +292,9 @@ describe('models', function () {
     });
 
     it('rejects filters and sorts that are not allowed', function () {
+        // Without operator filters, which allow sorting by any visible column.
+        FilamentApi::getPlugin(Filament::getPanel('admin'))->operatorFilters(false);
+
         getJson('api/secrets?filter[id]=1')->assertUnprocessable()->assertJsonValidationErrors('filter');
         getJson('api/secrets?sort=created_at')->assertUnprocessable()->assertJsonValidationErrors('sort');
     });

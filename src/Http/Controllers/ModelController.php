@@ -3,6 +3,7 @@
 namespace Allandereal\FilamentApi\Http\Controllers;
 
 use Allandereal\FilamentApi\Http\Resources\ApiResource;
+use Allandereal\FilamentApi\Support\ColumnQuery;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,7 +37,11 @@ class ModelController extends Controller
                     fn (string $filter): AllowedFilter => AllowedFilter::exact($filter),
                     $definition['filters'],
                 ))
-                ->allowedSorts($definition['sorts']);
+                // With operator filters, any column that `where` accepts can be sorted too.
+                ->allowedSorts(array_values(array_unique([
+                    ...$definition['sorts'],
+                    ...($this->getPlugin()->hasOperatorFilters() ? ColumnQuery::getQueryableColumns(app($model)) : []),
+                ])));
         } catch (InvalidFilterQuery $exception) {
             throw ValidationException::withMessages(['filter' => $exception->getMessage()]);
         } catch (InvalidSortQuery $exception) {

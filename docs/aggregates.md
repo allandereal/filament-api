@@ -37,6 +37,10 @@ Dates are compared as stored, so send them in the database's format, usually `Y-
 
 `where` is separate from `filter`, which applies the table's own [filters](listing.md#filtering).
 
+### Sorting by any column
+
+With operator filters on, `sort` also accepts any column that `where` accepts, not only the table's sortable columns: `?sort=-created_at&per_page=5` lists the 5 latest records even if the table can't sort by `created_at`. Sorting by a column replaces the table's default sort. The table's sortable columns, including relationship columns such as `customer.name`, keep working as before. Resource endpoints sort by one column at a time.
+
 ## Aggregates
 
 `aggregate={function}:{column}` computes one value over the whole query, ignoring pagination:

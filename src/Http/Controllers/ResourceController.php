@@ -37,7 +37,7 @@ class ResourceController extends Controller
 
         // A custom index page without a table is listed with the resource's query, without filters.
         $query = ($page && is_subclass_of($page, HasTable::class))
-            ? TableQuery::for(app($page), $request)
+            ? TableQuery::for(app($page), $request, $this->getPlugin()->hasOperatorFilters())
             : $resource::getEloquentQuery();
 
         return $this->applyColumnQuery($query, $request)
@@ -131,7 +131,7 @@ class ResourceController extends Controller
         $livewire->ownerRecord = $ownerRecord;
         $livewire->pageClass = $pageClass;
 
-        $query = TableQuery::for($livewire, $request);
+        $query = TableQuery::for($livewire, $request, $this->getPlugin()->hasOperatorFilters());
 
         return $this->applyColumnQuery($query, $request)
             ?? ApiResource::collection($this->paginate($query, $request));

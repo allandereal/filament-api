@@ -62,7 +62,7 @@ If the table has no searchable column, `search` is rejected.
 
 Columns that are hidden or not sortable are rejected. When `sort` is left out, the table's default sort applies.
 
-You can always sort by the record's primary key (`?sort=id` or `?sort=-id`), even if the table doesn't have a sortable column for it. It replaces the table's default sort, which gives you a stable order to page through records.
+You can always sort by the record's primary key (`?sort=id` or `?sort=-id`), even if the table doesn't have a sortable column for it. With [operator filters](aggregates.md#sorting-by-any-column) on, any visible column can be sorted. It replaces the table's default sort, which gives you a stable order to page through records.
 
 ## Tabs
 

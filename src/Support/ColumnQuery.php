@@ -256,6 +256,19 @@ class ColumnQuery
         return $value;
     }
 
+    /**
+     * The columns that can be filtered, sorted and aggregated.
+     *
+     * @return array<string>
+     */
+    public static function getQueryableColumns(Model $model): array
+    {
+        return array_values(array_filter(
+            array_keys(static::getColumns($model)),
+            fn (string $column): bool => static::isQueryable($model, $column),
+        ));
+    }
+
     public static function isQueryable(Model $model, string $column): bool
     {
         if (! array_key_exists($column, static::getColumns($model))) {

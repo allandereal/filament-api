@@ -25,7 +25,10 @@ use Livewire\Component;
  */
 class TableQuery
 {
-    public static function for(Component & HasTable $livewire, Request $request): Builder
+    /**
+     * @param  bool  $allowsColumnSorts  Whether `sort` also accepts the columns that `where` filters accept, see `->operatorFilters()`.
+     */
+    public static function for(Component & HasTable $livewire, Request $request, bool $allowsColumnSorts = false): Builder
     {
         if (method_exists($livewire, 'mount')) {
             $livewire->mount();
@@ -41,7 +44,7 @@ class TableQuery
         $keyName = $model->getKeyName();
 
         $keyFilter = null;
-        $keySortDirection = null;
+        $columnSort = null;
 
         $errors = [];
 
@@ -96,18 +99,23 @@ class TableQuery
         if (filled($sort = $request->query('sort'))) {
             $column = is_string($sort) ? ltrim($sort, '-') : '';
 
-            if (($column === $keyName) && (! $table->getSortableVisibleColumn($column))) {
-                $keySortDirection = str_starts_with($sort, '-') ? 'desc' : 'asc';
-            } elseif (! $table->getSortableVisibleColumn($column)) {
+            $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
+
+            if ($table->getSortableVisibleColumn($column)) {
+                $livewire->tableSortColumn = $column;
+                $livewire->tableSortDirection = $direction;
+            } elseif (($column === $keyName) || ($allowsColumnSorts && ColumnQuery::isQueryable($model, $column))) {
+                // The record key, and with operator filters any visible column, can be sorted even if the table can't.
+                $columnSort = [$model->qualifyColumn($column), $direction];
+            } else {
                 $sortable = collect($table->getColumns())
                     ->filter(fn ($column): bool => $column->isSortable() && (! $column->isHidden()))
                     ->keys()
                     ->all();
 
-                $errors['sort'] = static::unknown('sort', $column, [$keyName, ...$sortable]);
-            } else {
-                $livewire->tableSortColumn = $column;
-                $livewire->tableSortDirection = str_starts_with($sort, '-') ? 'desc' : 'asc';
+                $allowed = $allowsColumnSorts ? [...$sortable, 'or any visible column'] : [$keyName, ...$sortable];
+
+                $errors['sort'] = static::unknown('sort', $column, $allowed);
             }
         }
 
@@ -131,8 +139,8 @@ class TableQuery
             $query->whereIn($model->getQualifiedKeyName(), $keyFilter);
         }
 
-        if ($keySortDirection) {
-            $query->reorder($model->getQualifiedKeyName(), $keySortDirection);
+        if ($columnSort) {
+            $query->reorder(...$columnSort);
         }
 
         return $query;
