@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * A request made to the API, recorded when the panel's plugin uses `->logRequests()`.
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $ip
  * @property string|null $user_agent
  * @property string|null $error
- * @property \Illuminate\Support\Carbon $created_at
+ * @property Carbon $created_at
  */
 class ApiRequest extends Model
 {
