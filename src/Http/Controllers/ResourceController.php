@@ -10,6 +10,7 @@ use Closure;
 use Filament\Resources\Pages\CreateRecord as BaseCreateRecord;
 use Filament\Resources\Pages\EditRecord as BaseEditRecord;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\Resource;
 use Filament\Tables\Contracts\HasTable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;

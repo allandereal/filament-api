@@ -7,6 +7,7 @@ use Filament\Panel;
 use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\RelationManagers\RelationManagerConfiguration;
+use Filament\Resources\Resource;
 use LogicException;
 
 class FilamentApi
